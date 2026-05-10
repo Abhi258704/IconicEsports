@@ -3,81 +3,70 @@ import { OAuth2Client } from "google-auth-library";
 
 import User from "../models/user.model.js";
 
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+
 const client = new OAuth2Client(
    process.env.GOOGLE_CLIENT_ID
 );
 
-const googleLogin = async (req, res) => {
+const googleLogin = asyncHandler(async (req, res) => {
 
-   try {
+   const { credential } = req.body;
 
-      console.log("BODY:", req.body);
+   if (!credential) {
+      throw new ApiError(400, "Credential missing");
+   }
 
-      const { credential } = req.body;
+   const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+   });
 
-      if (!credential) {
-         return res.status(400).json({
-            success: false,
-            message: "Credential missing",
-         });
-      }
+   const payload = ticket.getPayload();
 
-      const ticket = await client.verifyIdToken({
-         idToken: credential,
-         audience: process.env.GOOGLE_CLIENT_ID,
-      });
+   const {
+      sub,
+      email,
+      name,
+      picture,
+   } = payload;
 
-      const payload = ticket.getPayload();
+   let user = await User.findOne({ email });
 
-      console.log("PAYLOAD:", payload);
+   if (!user) {
 
-      const {
-         sub,
-         email,
+      user = await User.create({
+         googleId: sub,
          name,
-         picture,
-      } = payload;
-
-      let user = await User.findOne({ email });
-
-      if (!user) {
-
-         user = await User.create({
-            googleId: sub,
-            name,
-            email,
-            avatar: picture,
-         });
-
-      }
-
-      const token = jwt.sign(
-         {
-            id: user._id,
-         },
-         process.env.JWT_SECRET,
-         {
-            expiresIn: "7d",
-         }
-      );
-
-      return res.status(200).json({
-         success: true,
-         token,
-         user,
-      });
-
-   } catch (error) {
-
-      console.log("GOOGLE LOGIN ERROR:");
-      console.log(error);
-
-      return res.status(500).json({
-         success: false,
-         message: error.message,
+         email,
+         avatar: picture,
       });
 
    }
-};
+
+   const token = jwt.sign(
+      {
+         id: user._id,
+      },
+      process.env.JWT_SECRET,
+      {
+         expiresIn: "7d",
+      }
+   );
+
+   return res.status(200).json(
+      new ApiResponse(
+         200,
+         {
+            token,
+            user,
+         },
+         "Google login successful"
+      )
+   );
+
+});
 
 export { googleLogin };
