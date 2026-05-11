@@ -28,6 +28,9 @@ const createTournament = asyncHandler(
             startDate,
         } = req.body;
 
+        const parsedMaps =
+            JSON.parse(maps);
+
         if (!name || !prizePool) {
             throw new ApiError(
                 400,
@@ -70,7 +73,7 @@ const createTournament = asyncHandler(
                 entryFee,
                 maxTeams,
                 teamSize,
-                maps,
+                maps: parsedMaps,
                 banner: banner.url,
                 rules,
                 startDate,

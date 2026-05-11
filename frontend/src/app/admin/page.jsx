@@ -6,7 +6,11 @@ import {
    ShieldCheck,
    Swords,
    ArrowUpRight,
+   Link,
 } from "lucide-react";
+
+import { useRouter }
+   from "next/navigation";
 
 import {
    useEffect,
@@ -16,6 +20,8 @@ import {
 import API from "@/lib/axios";
 
 export default function AdminPage() {
+
+   const router = useRouter();
 
    const [stats, setStats] =
       useState(null);
@@ -131,8 +137,17 @@ export default function AdminPage() {
                   verify teams and control the esports ecosystem.
                </p>
 
-               <button className="mt-8 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-black transition hover:scale-105">
+
+               <button
+                  onClick={() =>
+                     router.push(
+                        "/admin/tournaments"
+                     )
+                  }
+                  className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+               >
                   Manage Tournaments
+
                   <ArrowUpRight size={18} />
                </button>
 

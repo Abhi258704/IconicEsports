@@ -5,4 +5,11 @@
   --foreground: #171717;
 }
 
+::-webkit-scrollbar {
+   width: 6px;
+}
 
+::-webkit-scrollbar-thumb {
+   background: #9333ea;
+   border-radius: 999px;
+}
