@@ -46,12 +46,7 @@ const teamSchema = new mongoose.Schema(
         ref: "Round",
       },
     ],
-
-    qualified: {
-      type: Boolean,
-      default: false,
-    },
-
+    
     isDeleted: {
       type: Boolean,
       default: false,
@@ -62,6 +57,17 @@ const teamSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+teamSchema.index(
+   {
+      tournament: 1,
+      registeredBy: 1,
+   },
+   {
+      unique: true,
+   }
+);
+
 
 const Team = mongoose.model("Team", teamSchema);
 

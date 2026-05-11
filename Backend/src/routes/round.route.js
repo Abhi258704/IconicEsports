@@ -3,6 +3,7 @@ import express from "express";
 import {
    createRound,
    getTournamentRounds,
+   qualifyTeams,
 } from "../controllers/round.controller.js";
 
 import { verifyJWT }
@@ -25,6 +26,13 @@ router.get(
    verifyJWT,
    verifyAdmin,
    getTournamentRounds
+);
+
+router.post(
+   "/:id/qualify",
+   verifyJWT,
+   verifyAdmin,
+   qualifyTeams
 );
 
 export default router;

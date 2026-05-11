@@ -96,6 +96,16 @@ const matchSchema = new mongoose.Schema(
   }
 );
 
+matchSchema.index(
+   {
+      group: 1,
+      matchNumber: 1,
+   },
+   {
+      unique: true,
+   }
+);
+
 const Match = mongoose.model("Match", matchSchema);
 
 export default Match;

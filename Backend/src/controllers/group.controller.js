@@ -54,29 +54,50 @@ const generateGroups = asyncHandler(
 
       }
 
-      const verifiedTeams =
-         await Team.find({
+      let teams = [];
+
+      // ROUND 1
+      if (!round.previousRound) {
+
+         teams = await Team.find({
             tournament: tournamentId,
             status: "verified",
             isDeleted: false,
          });
 
-      if (
-         verifiedTeams.length === 0
-      ) {
+      }
+
+      // NEXT ROUNDS
+      else {
+
+         teams = await Team.find({
+            tournament: tournamentId,
+
+            qualifiedRounds:
+               round.previousRound,
+
+            isDeleted: false,
+         });
+
+      }
+
+      if (teams.length === 0) {
 
          throw new ApiError(
             400,
-            "No verified teams found"
+            "No eligible teams found"
          );
 
       }
+
+      // OPTIONAL RANDOM SHUFFLE
+      teams.sort(() => Math.random() - 0.5);
 
       const TEAMS_PER_GROUP = 16;
 
       const requiredGroups =
          Math.ceil(
-            verifiedTeams.length /
+            teams.length /
             TEAMS_PER_GROUP
          );
 
@@ -94,7 +115,7 @@ const generateGroups = asyncHandler(
             )}`;
 
          const groupTeams =
-            verifiedTeams.slice(
+            teams.slice(
                i * TEAMS_PER_GROUP,
                (i + 1) * TEAMS_PER_GROUP
             );
@@ -102,8 +123,11 @@ const generateGroups = asyncHandler(
          const group =
             await Group.create({
                name: groupName,
+
                tournament: tournamentId,
+
                round: roundId,
+
                teams: groupTeams.map(
                   (team) => team._id
                ),
@@ -119,9 +143,7 @@ const generateGroups = asyncHandler(
 
          }
 
-         round.groups.push(
-            group._id
-         );
+         round.groups.push(group._id);
 
          createdGroups.push(group);
 

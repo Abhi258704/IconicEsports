@@ -134,7 +134,8 @@ const updateMatchResults = asyncHandler(
       const { results } = req.body;
 
       const match =
-         await Match.findById(id);
+         await Match.findById(id)
+            .populate("teams");
 
       if (!match) {
 
@@ -145,7 +146,104 @@ const updateMatchResults = asyncHandler(
 
       }
 
+      if (
+         !results ||
+         !Array.isArray(results) ||
+         results.length === 0
+      ) {
+
+         throw new ApiError(
+            400,
+            "Results are required"
+         );
+
+      }
+
+      const submittedTeams =
+         new Set();
+
       results.forEach((result) => {
+
+         // TEAM REQUIRED
+         if (!result.team) {
+
+            throw new ApiError(
+               400,
+               "Team is required"
+            );
+
+         }
+
+         // DUPLICATE TEAM CHECK
+         if (
+            submittedTeams.has(
+               result.team.toString()
+            )
+         ) {
+
+            throw new ApiError(
+               400,
+               "Duplicate teams found in results"
+            );
+
+         }
+
+         submittedTeams.add(
+            result.team.toString()
+         );
+
+         // TEAM MUST BELONG TO MATCH
+         const teamExists =
+            match.teams.some(
+               (team) =>
+                  team._id.toString() ===
+                  result.team.toString()
+            );
+
+         if (!teamExists) {
+
+            throw new ApiError(
+               400,
+               "Invalid team in results"
+            );
+
+         }
+
+         // NEGATIVE KILLS CHECK
+         if (result.kills < 0) {
+
+            throw new ApiError(
+               400,
+               "Kills cannot be negative"
+            );
+
+         }
+
+         // NEGATIVE PLACEMENT POINTS CHECK
+         if (
+            result.placementPoints < 0
+         ) {
+
+            throw new ApiError(
+               400,
+               "Placement points cannot be negative"
+            );
+
+         }
+
+         // INVALID PLACEMENT CHECK
+         if (
+            result.placement < 1 ||
+            result.placement >
+            match.teams.length
+         ) {
+
+            throw new ApiError(
+               400,
+               `Placement must be between 1 and ${match.teams.length}`
+            );
+
+         }
 
          result.totalPoints =
             result.placementPoints +

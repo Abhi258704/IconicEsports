@@ -22,7 +22,12 @@ const roundSchema = new mongoose.Schema(
       type: Number,
       default: 4,
     },
-
+    
+    previousRound: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Round",
+    },
+    
     groups: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -39,6 +44,16 @@ const roundSchema = new mongoose.Schema(
   {
     timestamps: true,
   }
+);
+
+roundSchema.index(
+   {
+      tournament: 1,
+      roundNumber: 1,
+   },
+   {
+      unique: true,
+   }
 );
 
 const Round = mongoose.model("Round", roundSchema);

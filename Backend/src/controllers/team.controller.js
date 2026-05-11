@@ -56,6 +56,15 @@ const registerTeam = asyncHandler(
 
       }
 
+      if (!tournament.registrationOpen) {
+
+         throw new ApiError(
+            400,
+            "Tournament registrations are closed"
+         );
+
+      }
+
       const existingTeam =
          await Team.findOne({
             tournament: tournamentId,
