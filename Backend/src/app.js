@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./routes/user.route.js";
+import tournamentRoutes from "./routes/tournament.route.js";
 
 
 const app = express()
@@ -17,8 +19,20 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 
+
+
 // auth
 app.use("/api/v1/auth", authRoutes);
+
+//routes
+app.use("/api/v1/users", userRoutes);
+
+app.use("/api/v1/tournaments",tournamentRoutes);
+
+
+
+
+
 
 
 

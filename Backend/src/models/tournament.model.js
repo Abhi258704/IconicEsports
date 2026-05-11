@@ -5,6 +5,7 @@ const tournamentSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     game: {
@@ -17,6 +18,11 @@ const tournamentSchema = new mongoose.Schema(
       required: true,
     },
 
+    entryFee: {
+      type: Number,
+      default: 0,
+    },
+
     maxTeams: {
       type: Number,
       default: 64,
@@ -27,21 +33,76 @@ const tournamentSchema = new mongoose.Schema(
       default: 4,
     },
 
+    maps: [
+      {
+        type: String,
+        enum: [
+          "Erangel",
+          "Miramar",
+          "Sanhok",
+          "Livik",
+          "Rondo",
+        ],
+      },
+    ],
+
+    banner: {
+      type: String,
+      required: true,
+    },
+
     status: {
       type: String,
-      enum: ["upcoming", "ongoing", "completed"],
+      enum: [
+        "upcoming",
+        "registration-open",
+        "ongoing",
+        "completed",
+      ],
       default: "upcoming",
     },
 
-    rules: [String],
+    registrationOpen: {
+      type: Boolean,
+      default: true,
+    },
 
-    startDate: Date,
+    rules: [
+      {
+        type: String,
+      },
+    ],
+
+    startDate: {
+      type: Date,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+
+    rounds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Round",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-const Tournament = mongoose.model("Tournament", tournamentSchema);
+const Tournament = mongoose.model(
+  "Tournament",
+  tournamentSchema
+);
 
 export default Tournament;
