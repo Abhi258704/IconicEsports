@@ -8,6 +8,7 @@ import teamRoutes from "./routes/team.route.js";
 import roundRoutes from "./routes/round.route.js";
 import groupRoutes from "./routes/group.route.js";
 import matchRoutes from "./routes/match.route.js";
+import dashboardRoutes from "./routes/dashboard.route.js";
 
 
 const app = express()
@@ -40,6 +41,8 @@ app.use("/api/v1/rounds",roundRoutes);
 app.use("/api/v1/groups",groupRoutes);
 
 app.use("/api/v1/matches",matchRoutes);
+
+app.use("/api/v1/dashboard",dashboardRoutes);
 
 
 

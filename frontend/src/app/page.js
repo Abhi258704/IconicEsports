@@ -2,48 +2,92 @@
 
 import axios from "axios";
 
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin }
+   from "@react-oauth/google";
+
+import { useRouter }
+   from "next/navigation";
 
 export default function Home() {
 
-  const handleSuccess = async (credentialResponse) => {
+   const router = useRouter();
 
-    console.log("SUCCESS");
-    console.log(credentialResponse);
+   const handleSuccess = async (
+      credentialResponse
+   ) => {
 
-    try {
+      console.log("SUCCESS");
 
-      const res = await axios.post(
-        "http://localhost:8000/api/v1/auth/google",
-        {
-          credential: credentialResponse.credential,
-        }
-      );
+      // console.log(
+      //    credentialResponse
+      // );
 
-      console.log("BACKEND RESPONSE:");
-      console.log(res.data);
+      try {
 
-      localStorage.setItem(
-        "token",
-        res.data.token
-      );
+         const res =
+            await axios.post(
+               "http://localhost:8000/api/v1/auth/google",
+               {
+                  credential:
+                     credentialResponse.credential,
+               }
+            );
 
-    } catch (error) {
+         console.log(
+            "BACKEND RESPONSE:"
+         );
 
-      console.log("AXIOS ERROR:");
-      console.log(error);
+         // console.log(res.data);
 
-    }
-  };
+         // STORE JWT
+         localStorage.setItem(
+            "token",
+            res.data.data.token
+         );
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <GoogleLogin
-        onSuccess={handleSuccess}
-        onError={() => {
-          console.log("FAILED");
-        }}
-      />
-    </div>
-  );
+         // STORE USER
+         localStorage.setItem(
+            "user",
+            JSON.stringify(
+               res.data.data.user
+            )
+         );
+
+         // console.log(
+         //    "LOGIN SUCCESS"
+         // );
+
+         // REDIRECT
+         router.push("/admin");
+
+      } catch (error) {
+
+         console.log(
+            "AXIOS ERROR:"
+         );
+
+         console.log(error);
+
+      }
+
+   };
+
+   return (
+
+      <div className="flex items-center justify-center min-h-screen">
+
+         <GoogleLogin
+            onSuccess={
+               handleSuccess
+            }
+
+            onError={() => {
+               console.log("FAILED");
+            }}
+         />
+
+      </div>
+
+   );
+
 }
