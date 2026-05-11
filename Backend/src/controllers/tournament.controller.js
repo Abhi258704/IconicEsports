@@ -179,6 +179,102 @@ const deleteTournament = asyncHandler(
     }
 );
 
+const updateTournament = asyncHandler(
+   async (req, res) => {
+
+      const { id } = req.params;
+
+      const tournament =
+         await Tournament.findById(id);
+
+      if (!tournament) {
+
+         throw new ApiError(
+            404,
+            "Tournament not found"
+         );
+
+      }
+
+      const {
+         name,
+         prizePool,
+         entryFee,
+         maxTeams,
+         teamSize,
+         maps,
+         rules,
+         startDate,
+         status,
+      } = req.body;
+
+      const parsedMaps =
+         JSON.parse(maps);
+
+      /* BASIC FIELDS */
+
+      tournament.name =
+         name || tournament.name;
+
+      tournament.prizePool =
+         prizePool ||
+         tournament.prizePool;
+
+      tournament.entryFee =
+         entryFee ||
+         tournament.entryFee;
+
+      tournament.maxTeams =
+         maxTeams ||
+         tournament.maxTeams;
+
+      tournament.teamSize =
+         teamSize ||
+         tournament.teamSize;
+
+      tournament.rules =
+         rules || tournament.rules;
+
+      tournament.startDate =
+         startDate ||
+         tournament.startDate;
+
+      tournament.maps =
+         parsedMaps ||
+         tournament.maps;
+
+      tournament.status =
+         status ||
+         tournament.status;
+
+      /* BANNER */
+
+      if (req.file) {
+
+         const banner =
+            await uploadOnCloudinary(
+               req.file.path
+            );
+
+         tournament.banner =
+            banner.url;
+
+      }
+
+      await tournament.save();
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            tournament,
+            "Tournament updated successfully"
+         )
+
+      );
+
+   }
+);
 
 
 
@@ -190,4 +286,5 @@ export {
     getAllTournaments,
     getTournamentById,
     deleteTournament,
+    updateTournament,
 };

@@ -5,6 +5,7 @@ import {
     getAllTournaments,
     getTournamentById,
     deleteTournament,
+    updateTournament,
 } from "../controllers/tournament.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -28,6 +29,12 @@ router.route("/")
 
 router.route("/:id")
     .get(getTournamentById)
+    .patch(
+        verifyJWT,
+        verifyAdmin,
+        upload.single("banner"),
+        updateTournament
+    )
     .delete(
         verifyJWT,
         verifyAdmin,

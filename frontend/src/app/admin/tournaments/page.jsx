@@ -112,7 +112,7 @@ export default function TournamentsPage() {
 
     return (
 
-        <div className="space-y-10">
+        <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
 
             {/* HEADER */}
 
@@ -132,7 +132,7 @@ export default function TournamentsPage() {
 
                 <Link
                     href="/admin/tournaments/create"
-                    className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-black transition hover:scale-105"
+                    className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
                 >
 
                     <Plus size={20} />
@@ -147,7 +147,7 @@ export default function TournamentsPage() {
 
             {tournaments.length === 0 && (
 
-                <div className="rounded-3xl border border-purple-500/20 bg-white/[0.03] p-16 text-center">
+                <div className="mt-10 rounded-3xl border border-purple-500/20 bg-white/[0.03] p-16 text-center">
 
                     <Trophy
                         size={70}
@@ -166,134 +166,147 @@ export default function TournamentsPage() {
 
             )}
 
-            {/* GRID */}
+            {/* SCROLL AREA */}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+            <div className="mt-10 flex-1 overflow-y-auto pr-2">
 
-                {tournaments.map(
-                    (tournament) => (
+                {/* GRID */}
 
-                        <div
-                            key={tournament._id}
-                            className="group overflow-hidden rounded-3xl border border-purple-500/20 bg-white/[0.03] backdrop-blur-xl transition hover:-translate-y-1 hover:border-purple-500/40"
-                        >
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
 
-                            {/* BANNER */}
+                    {tournaments.map(
+                        (tournament) => (
 
-                            <div className="relative h-52 overflow-hidden">
+                            <Link
+                                href={`/admin/tournaments/${tournament._id}`}
+                                key={tournament._id}
+                                className="group overflow-hidden rounded-3xl border border-purple-500/20 bg-white/[0.03] backdrop-blur-xl transition hover:-translate-y-1 hover:border-purple-500/40"
+                            >
 
-                                <Image
-                                    src={tournament.banner}
-                                    alt={tournament.name}
-                                    fill
-                                    sizes="(max-width: 768px) 100vw,
-                                            (max-width: 1200px) 50vw,
-                                            33vw"
-                                    priority
-                                    className="object-cover transition duration-500 group-hover:scale-105"
-                                />
+                                {/* BANNER */}
 
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                                <div className="relative h-52 overflow-hidden">
 
-                            </div>
+                                    <Image
+                                        src={tournament.banner}
+                                        alt={tournament.name}
+                                        fill
+                                        sizes="(max-width: 768px) 100vw,
+                                        (max-width: 1200px) 50vw,
+                                        33vw"
+                                        priority
+                                        className="object-cover transition duration-500 group-hover:scale-105"
+                                    />
 
-                            {/* CONTENT */}
-
-                            <div className="p-6">
-
-                                <div className="flex items-start justify-between gap-4">
-
-                                    <div>
-
-                                        <p className="text-xs uppercase tracking-[0.25em] text-purple-400">
-                                            {tournament.game}
-                                        </p>
-
-                                        <h2 className="mt-2 text-3xl font-black text-white">
-                                            {tournament.name}
-                                        </h2>
-
-                                    </div>
-
-                                    <button
-                                        onClick={() => {
-
-                                            setSelectedTournament(
-                                                tournament
-                                            );
-
-                                            setDeleteModal(true);
-
-                                        }}
-                                        className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-red-400 transition hover:bg-red-500/20"
-                                    >
-
-                                        <Trash2 size={18} />
-
-                                    </button>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
                                 </div>
 
-                                <div className="mt-6 space-y-4">
+                                {/* CONTENT */}
 
-                                    <div className="flex items-center justify-between">
+                                <div className="p-6">
 
-                                        <span className="text-gray-400">
-                                            Prize Pool
-                                        </span>
+                                    <div className="flex items-start justify-between gap-4">
 
-                                        <span className="font-bold text-white">
-                                            ₹{tournament.prizePool}
-                                        </span>
+                                        <div>
+
+                                            <p className="text-xs uppercase tracking-[0.25em] text-purple-400">
+                                                {tournament.game}
+                                            </p>
+
+                                            <h2 className="mt-2 text-3xl font-black text-white">
+                                                {tournament.name}
+                                            </h2>
+
+                                        </div>
+
+                                        <button
+                                            onClick={(e) => {
+
+                                                e.preventDefault();
+
+                                                e.stopPropagation();
+
+                                                setSelectedTournament(
+                                                    tournament
+                                                );
+
+                                                setDeleteModal(true);
+
+                                            }}
+                                            className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-red-400 transition hover:bg-red-500/20"
+                                        >
+
+                                            <Trash2 size={18} />
+
+                                        </button>
 
                                     </div>
 
-                                    <div className="flex items-center justify-between">
+                                    <div className="mt-6 space-y-4">
 
-                                        <span className="text-gray-400">
-                                            Entry Fee
-                                        </span>
+                                        <div className="flex items-center justify-between">
 
-                                        <span className="font-bold text-white">
-                                            ₹{tournament.entryFee}
-                                        </span>
+                                            <span className="text-gray-400">
+                                                Prize Pool
+                                            </span>
 
-                                    </div>
+                                            <span className="font-bold text-white">
+                                                ₹{tournament.prizePool}
+                                            </span>
 
-                                    <div className="flex items-center justify-between">
+                                        </div>
 
-                                        <span className="text-gray-400">
-                                            Max Teams
-                                        </span>
+                                        <div className="flex items-center justify-between">
 
-                                        <span className="font-bold text-white">
-                                            {tournament.maxTeams}
-                                        </span>
+                                            <span className="text-gray-400">
+                                                Entry Fee
+                                            </span>
 
-                                    </div>
+                                            <span className="font-bold text-white">
+                                                ₹{tournament.entryFee}
+                                            </span>
 
-                                    <div className="flex items-center gap-2 text-gray-400 pt-2">
+                                        </div>
 
-                                        <CalendarDays size={18} />
+                                        <div className="flex items-center justify-between">
 
-                                        <span>
-                                            {new Date(
-                                                tournament.startDate
-                                            ).toLocaleDateString()}
-                                        </span>
+                                            <span className="text-gray-400">
+                                                Max Teams
+                                            </span>
+
+                                            <span className="font-bold text-white">
+                                                {tournament.maxTeams}
+                                            </span>
+
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-gray-400 pt-2">
+
+                                            <CalendarDays size={18} />
+
+                                            <span>
+                                                {new Date(
+                                                    tournament.startDate
+                                                ).toLocaleDateString()}
+                                            </span>
+
+                                        </div>
 
                                     </div>
 
                                 </div>
 
-                            </div>
+                            </Link>
 
-                        </div>
+                        )
+                    )}
 
-                    )
-                )}
+                </div>
 
             </div>
+
+            {/* DELETE MODAL */}
 
             {
                 deleteModal && (
