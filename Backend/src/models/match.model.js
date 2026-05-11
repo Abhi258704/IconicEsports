@@ -8,7 +8,7 @@ const resultSchema = new mongoose.Schema(
       required: true,
     },
 
-    placement: {
+    placementPoints: {
       type: Number,
       default: 0,
     },
@@ -18,7 +18,7 @@ const resultSchema = new mongoose.Schema(
       default: 0,
     },
 
-    points: {
+    totalPoints: {
       type: Number,
       default: 0,
     },

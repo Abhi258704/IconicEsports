@@ -40,11 +40,23 @@ const teamSchema = new mongoose.Schema(
       ref: "User",
     },
 
+    qualifiedRounds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Round",
+      },
+    ],
+
+    qualified: {
+      type: Boolean,
+      default: false,
+    },
+
     isDeleted: {
       type: Boolean,
       default: false,
     },
-    
+
   },
   {
     timestamps: true,
