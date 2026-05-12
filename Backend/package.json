@@ -11,9 +11,12 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon -r dotenv/config --experimental-json-modules src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "seed:teams" : "node src/seeds/seedTeams.js",
+    "assign:groups" : "node src/seeds/assignTeamsToGroups.js"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.4.0",
     "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

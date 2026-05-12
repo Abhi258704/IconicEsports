@@ -8,6 +8,10 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 import { ApiError } from "../utils/ApiError.js";
 
+import Round from "../models/round.model.js";
+
+import Group from "../models/group.model.js";
+
 
 
 
@@ -140,16 +144,121 @@ const verifyTeam = asyncHandler(
 
       }
 
+      /* VERIFY TEAM */
+
       team.status = "verified";
+
+      /* FIND ACTIVE ROUND */
+
+      const activeRound =
+         await Round.findOne({
+            tournament:
+               team.tournament,
+
+            status: {
+               $in: [
+                  "ongoing",
+                  "upcoming",
+               ],
+            },
+         }).sort({
+            roundNumber: 1,
+         });
+
+      if (!activeRound) {
+
+         throw new ApiError(
+            404,
+            "No active round found"
+         );
+
+      }
+
+      /* FIND AVAILABLE GROUP */
+
+      let group =
+         await Group.findOne({
+            round:
+               activeRound._id,
+         })
+
+         .populate("teams")
+
+         .sort({
+            createdAt: 1,
+         });
+
+      const TEAMS_PER_GROUP = 8;
+
+      if (
+         !group ||
+
+         group.teams.length >=
+         TEAMS_PER_GROUP
+      ) {
+
+         /* CREATE NEW GROUP */
+
+         const groupCount =
+            await Group.countDocuments({
+               round:
+                  activeRound._id,
+            });
+
+         const groupName =
+            `Group ${
+               String.fromCharCode(
+                  65 + groupCount
+               )
+            }`;
+
+         group =
+            await Group.create({
+
+               name:
+                  groupName,
+
+               tournament:
+                  team.tournament,
+
+               round:
+                  activeRound._id,
+
+               teams: [],
+            });
+
+         activeRound.groups.push(
+            group._id
+         );
+
+         await activeRound.save();
+
+      }
+
+      /* ASSIGN TEAM */
+
+      group.teams.push(
+         team._id
+      );
+
+      await group.save();
+
+      team.group =
+         group._id;
 
       await team.save();
 
       return res.status(200).json(
+
          new ApiResponse(
             200,
-            team,
-            "Team verified successfully"
+            {
+               team,
+               group,
+            },
+            "Team verified and assigned successfully"
          )
+
       );
 
    }

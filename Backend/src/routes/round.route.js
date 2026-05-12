@@ -4,6 +4,7 @@ import {
    createRound,
    getTournamentRounds,
    qualifyTeams,
+   getRoundById,
 } from "../controllers/round.controller.js";
 
 import { verifyJWT }
@@ -26,6 +27,13 @@ router.get(
    verifyJWT,
    verifyAdmin,
    getTournamentRounds
+);
+
+router.get(
+   "/:id",
+   verifyJWT,
+   verifyAdmin,
+   getRoundById
 );
 
 router.post(

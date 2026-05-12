@@ -257,7 +257,7 @@ export default function CreateTournamentPage() {
                     />
 
                     <Input
-                        label="Max Teams"
+                        label="Max Teams (Total teams in tournament)"
                         name="maxTeams"
                         type="number"
                         value={formData.maxTeams}
@@ -367,6 +367,7 @@ export default function CreateTournamentPage() {
                         rows={5}
                         value={formData.rules}
                         onChange={handleChange}
+                        placeholder="Write NOTHING - if no rules"
                         className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
                     />
 

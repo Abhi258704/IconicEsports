@@ -6,6 +6,7 @@ import {
     getTournamentById,
     deleteTournament,
     updateTournament,
+    getTournamentTeamsData,
 } from "../controllers/tournament.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -26,6 +27,13 @@ router.route("/")
         upload.single("banner"),
         createTournament
     );
+
+router.get(
+    "/:id/teams-data",
+    verifyJWT,
+    verifyAdmin,
+    getTournamentTeamsData
+);
 
 router.route("/:id")
     .get(getTournamentById)

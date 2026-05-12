@@ -276,6 +276,56 @@ const updateTournament = asyncHandler(
    }
 );
 
+const getTournamentTeamsData = asyncHandler(
+      async (req, res) => {
+
+         const { id } =
+            req.params;
+
+         /* GROUPS */
+
+         const groups =
+            await Group.find({
+               tournament: id,
+            })
+
+            .populate("teams")
+
+            .sort({
+               createdAt: 1,
+            });
+
+         /* PENDING */
+
+         const pendingTeams =
+            await Team.find({
+
+               tournament: id,
+
+               status: "pending",
+
+               isDeleted: false,
+
+            }).sort({
+               createdAt: -1,
+            });
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               {
+                  groups,
+                  pendingTeams,
+               },
+               "Tournament team data fetched successfully"
+            )
+
+         );
+
+      }
+   );
+
 
 
 
@@ -287,4 +337,5 @@ export {
     getTournamentById,
     deleteTournament,
     updateTournament,
+    getTournamentTeamsData,
 };

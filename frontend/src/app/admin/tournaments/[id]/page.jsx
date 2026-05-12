@@ -40,9 +40,18 @@ export default function TournamentDetailsPage({
     const [loading, setLoading] =
         useState(true);
 
+    const [groups, setGroups] =
+        useState([]);
+
+    const [pendingTeams,
+        setPendingTeams] =
+        useState([]);
+
     useEffect(() => {
 
         fetchTournament();
+
+        fetchTeamsData();
 
     }, []);
 
@@ -88,6 +97,32 @@ export default function TournamentDetailsPage({
             } finally {
 
                 setLoading(false);
+
+            }
+
+        };
+
+    const fetchTeamsData =
+        async () => {
+
+            try {
+
+                const res =
+                    await API.get(
+                        `/tournaments/${id}/teams-data`
+                    );
+
+                setGroups(
+                    res.data.data.groups
+                );
+
+                setPendingTeams(
+                    res.data.data.pendingTeams
+                );
+
+            } catch (error) {
+
+                console.log(error);
 
             }
 
@@ -286,6 +321,33 @@ export default function TournamentDetailsPage({
                     </div>
 
                 </div>
+
+            </div>
+
+            {/* ROUND MANAGEMENT */}
+
+            <div className="mt-10 flex gap-4">
+
+                <Link
+                    href={`/admin/tournaments/${id}/rounds`}
+                    className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                >
+
+                    <Layers3 size={20} />
+
+                    Manage Rounds
+
+                </Link>
+
+                 <Link
+                    href={`/admin/tournaments/${id}/pending-teams`}
+                    className="inline-flex items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-6 py-4 font-bold text-yellow-400 transition hover:bg-yellow-500/20"
+                >
+
+                    Pending Teams
+                    ({pendingTeams.length})
+
+                </Link>
 
             </div>
 

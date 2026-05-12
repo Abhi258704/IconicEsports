@@ -259,10 +259,49 @@ const qualifyTeams = asyncHandler(
    }
 );
 
+const getRoundById = asyncHandler(
+   async (req, res) => {
+
+      const { id } =
+         req.params;
+
+      const round =
+         await Round.findById(id)
+
+            .populate({
+               path: "groups",
+               populate: {
+                  path: "teams",
+               },
+            });
+
+      if (!round) {
+
+         throw new ApiError(
+            404,
+            "Round not found"
+         );
+
+      }
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            round,
+            "Round fetched successfully"
+         )
+
+      );
+
+   }
+);
+
 
 
 export {
    createRound,
    getTournamentRounds,
    qualifyTeams,
+   getRoundById,
 };
