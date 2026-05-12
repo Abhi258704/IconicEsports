@@ -8,6 +8,9 @@ import { ApiError } from "../utils/ApiError.js";
 
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
+import Team from "../models/team.model.js";
+
+import Round from "../models/round.model.js";
 
 
 
@@ -116,38 +119,89 @@ const getAllTournaments = asyncHandler(
 );
 
 const getTournamentById = asyncHandler(
-    async (req, res) => {
+      async (req, res) => {
 
-        const { id } = req.params;
+         const { id } =
+            req.params;
 
-        const tournament =
-            await Tournament.findById({
-                _id: id,
-                isDeleted: false,
-            })
-                .populate(
-                    "createdBy",
-                    "name email avatar"
-                )
-                .populate("rounds");
+         const tournament =
+            await Tournament.findById(id);
 
-        if (!tournament) {
+         if (!tournament) {
+
             throw new ApiError(
-                404,
-                "Tournament not found"
+               404,
+               "Tournament not found"
             );
-        }
 
-        return res.status(200).json(
+         }
+
+         /* STATS */
+
+         const totalTeams =
+            await Team.countDocuments({
+
+               tournament: id,
+
+               isDeleted: false,
+
+            });
+
+         const verifiedTeams =
+            await Team.countDocuments({
+
+               tournament: id,
+
+               status: "verified",
+
+               isDeleted: false,
+
+            });
+
+         const pendingTeams =
+            await Team.countDocuments({
+
+               tournament: id,
+
+               status: "pending",
+
+               isDeleted: false,
+
+            });
+
+         const totalRounds =
+            await Round.countDocuments({
+               tournament: id,
+            });
+
+         return res.status(200).json(
+
             new ApiResponse(
-                200,
-                tournament,
-                "Tournament fetched successfully"
-            )
-        );
+               200,
+               {
 
-    }
-);
+                  tournament,
+
+                  stats: {
+
+                     totalTeams,
+
+                     verifiedTeams,
+
+                     pendingTeams,
+
+                     totalRounds,
+
+                  },
+
+               },
+               "Tournament fetched successfully"
+            )
+
+         );
+
+      }
+   );
 
 const deleteTournament = asyncHandler(
     async (req, res) => {

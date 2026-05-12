@@ -42,6 +42,7 @@ export default function EditTournamentPage({
          entryFee: "",
          maxTeams: "",
          teamSize: "",
+         teamsPerGroup: 16,
          maps: [],
          rules: "",
          startDate: "",
@@ -87,6 +88,9 @@ export default function EditTournamentPage({
 
                teamSize:
                   tournament.teamSize || "",
+
+               teamsPerGroup:
+                  data.teamsPerGroup || 16,
 
                maps:
                   tournament.maps || [],
@@ -290,6 +294,14 @@ export default function EditTournamentPage({
                      onChange={handleChange}
                   />
 
+                  <Input
+                     label="Teams Per Group"
+                     name="teamsPerGroup"
+                     type="number"
+                     value={formData.teamsPerGroup}
+                     onChange={handleChange}
+                  />
+
                   <div>
 
                      <label className="text-sm text-gray-400">
@@ -348,11 +360,10 @@ export default function EditTournamentPage({
                            key={map}
                            className={`flex cursor-pointer items-center justify-center rounded-2xl border px-4 py-4 font-semibold transition
 
-                           ${
-                              formData.maps.includes(map)
+                           ${formData.maps.includes(map)
                                  ? "border-purple-500 bg-purple-500/20 text-purple-300"
                                  : "border-white/10 bg-black/20 text-gray-400 hover:border-purple-500/40"
-                           }`}
+                              }`}
                         >
 
                            <input

@@ -46,7 +46,24 @@ const teamSchema = new mongoose.Schema(
         ref: "Round",
       },
     ],
-    
+
+    currentRound: {
+      type:
+        mongoose.Schema.Types.ObjectId,
+      ref: "Round",
+    },
+
+    isEliminated: {
+      type: Boolean,
+      default: false,
+    },
+
+    eliminatedInRound: {
+      type:
+        mongoose.Schema.Types.ObjectId,
+      ref: "Round",
+    },
+
     isDeleted: {
       type: Boolean,
       default: false,
@@ -59,13 +76,13 @@ const teamSchema = new mongoose.Schema(
 );
 
 teamSchema.index(
-   {
-      tournament: 1,
-      registeredBy: 1,
-   },
-   {
-      unique: true,
-   }
+  {
+    tournament: 1,
+    registeredBy: 1,
+  },
+  {
+    unique: true,
+  }
 );
 
 

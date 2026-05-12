@@ -31,6 +31,9 @@ export default function TournamentDetailsPage({
 
     const { id } = use(params);
 
+    const [stats, setStats] =
+        useState(null);
+
     const [deleteModal, setDeleteModal] =
         useState(false);
 
@@ -87,7 +90,11 @@ export default function TournamentDetailsPage({
                     );
 
                 setTournament(
-                    res.data.data
+                    res.data.data.tournament
+                );
+
+                setStats(
+                    res.data.data.stats
                 );
 
             } catch (error) {
@@ -250,41 +257,53 @@ export default function TournamentDetailsPage({
 
                     {/* STATS */}
 
-                    <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="mt-12 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-                        <div className="rounded-2xl border border-purple-500/20 bg-black/30 p-5">
+                        <div className="rounded-3xl border border-purple-500/20 bg-white/[0.03] p-8">
 
-                            <p className="text-sm text-gray-400">
-                                Prize Pool
-                            </p>
-
-                            <h2 className="mt-3 text-3xl font-black text-white">
-                                ₹{tournament.prizePool}
+                            <h2 className="text-5xl font-black text-white">
+                                {stats?.totalTeams || 0}
                             </h2>
+
+                            <p className="mt-3 text-gray-400">
+                                Total Teams
+                            </p>
 
                         </div>
 
-                        <div className="rounded-2xl border border-cyan-500/20 bg-black/30 p-5">
+                        <div className="rounded-3xl border border-green-500/20 bg-white/[0.03] p-8">
 
-                            <p className="text-sm text-gray-400">
-                                Entry Fee
-                            </p>
-
-                            <h2 className="mt-3 text-3xl font-black text-white">
-                                ₹{tournament.entryFee}
+                            <h2 className="text-5xl font-black text-white">
+                                {stats?.verifiedTeams || 0}
                             </h2>
+
+                            <p className="mt-3 text-gray-400">
+                                Verified Teams
+                            </p>
 
                         </div>
 
-                        <div className="rounded-2xl border border-pink-500/20 bg-black/30 p-5">
+                        <div className="rounded-3xl border border-yellow-500/20 bg-white/[0.03] p-8">
 
-                            <p className="text-sm text-gray-400">
-                                Team Capacity
+                            <h2 className="text-5xl font-black text-white">
+                                {stats?.pendingTeams || 0}
+                            </h2>
+
+                            <p className="mt-3 text-gray-400">
+                                Pending Teams
                             </p>
 
-                            <h2 className="mt-3 text-3xl font-black text-white">
-                                {tournament.maxTeams}
+                        </div>
+
+                        <div className="rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8">
+
+                            <h2 className="text-5xl font-black text-white">
+                                {stats?.totalRounds || 0}
                             </h2>
+
+                            <p className="mt-3 text-gray-400">
+                                Tournament Rounds
+                            </p>
 
                         </div>
 
@@ -326,28 +345,73 @@ export default function TournamentDetailsPage({
 
             {/* ROUND MANAGEMENT */}
 
-            <div className="mt-10 flex gap-4">
+            <div className="mt-12 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
-                <Link
-                    href={`/admin/tournaments/${id}/rounds`}
-                    className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                >
+                {/* ACTIONS */}
 
-                    <Layers3 size={20} />
+                <div className="flex flex-wrap gap-5">
 
-                    Manage Rounds
+                    <Link
+                        href={`/admin/tournaments/${id}/pending-teams`}
+                        className="inline-flex items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-6 py-4 font-bold text-yellow-400 transition hover:bg-yellow-500/20"
+                    >
 
-                </Link>
+                        Pending Teams
+                        ({stats?.pendingTeams || 0})
 
-                 <Link
-                    href={`/admin/tournaments/${id}/pending-teams`}
-                    className="inline-flex items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-6 py-4 font-bold text-yellow-400 transition hover:bg-yellow-500/20"
-                >
+                    </Link>
 
-                    Pending Teams
-                    ({pendingTeams.length})
+                    <Link
+                        href={`/admin/tournaments/${id}/teams`}
+                        className="inline-flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-4 font-bold text-cyan-400 transition hover:bg-cyan-500/20"
+                    >
 
-                </Link>
+                        All Teams
+                        ({stats?.totalTeams || 0})
+
+                    </Link>
+
+                    <Link
+                        href={`/admin/tournaments/${id}/rounds`}
+                        className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                    >
+
+                        Manage Rounds
+
+                    </Link>
+
+                </div>
+
+                {/* STATUS */}
+
+                <div className="lg:text-right">
+
+                    <p className="uppercase tracking-[0.25em] text-xs text-gray-400">
+                        Tournament Status
+                    </p>
+
+                    <div
+                        className={`mt-3 inline-flex rounded-2xl px-5 py-3 text-sm font-bold
+
+         ${tournament.status ===
+                                "ongoing"
+
+                                ? "bg-green-500/20 text-green-400"
+
+                                : tournament.status ===
+                                    "completed"
+
+                                    ? "bg-red-500/20 text-red-400"
+
+                                    : "bg-yellow-500/20 text-yellow-400"
+                            }`}
+                    >
+
+                        {tournament.status}
+
+                    </div>
+
+                </div>
 
             </div>
 

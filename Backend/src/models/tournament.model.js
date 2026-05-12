@@ -33,6 +33,11 @@ const tournamentSchema = new mongoose.Schema(
       default: 4,
     },
 
+    teamsPerGroup: {
+      type: Number,
+      default: 8,
+    },
+
     maps: [
       {
         type: String,

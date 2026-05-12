@@ -5,6 +5,7 @@ import {
    getTournamentTeams,
    verifyTeam,
    rejectTeam,
+   getTeamById,
 } from "../controllers/team.controller.js";
 
 import { verifyJWT }
@@ -28,6 +29,13 @@ router.get(
    verifyJWT,
    verifyAdmin,
    getTournamentTeams
+);
+
+router.get(
+   "/:teamId",
+   verifyJWT,
+   verifyAdmin,
+   getTeamById
 );
 
 router.patch(

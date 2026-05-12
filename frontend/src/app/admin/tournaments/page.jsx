@@ -218,6 +218,27 @@ export default function TournamentsPage() {
                                                 {tournament.name}
                                             </h2>
 
+                                            <div
+                                                className={`mt-4 inline-flex rounded-2xl px-4 py-2 text-sm font-bold
+
+                                                         ${tournament.status ===
+                                                        "ongoing"
+
+                                                        ? "bg-green-500/20 text-green-400"
+
+                                                        : tournament.status ===
+                                                            "completed"
+
+                                                            ? "bg-red-500/20 text-red-400"
+
+                                                            : "bg-yellow-500/20 text-yellow-400"
+                                                    }`}
+                                                      >
+
+                                                {tournament.status}
+
+                                            </div>
+
                                         </div>
 
                                         <button

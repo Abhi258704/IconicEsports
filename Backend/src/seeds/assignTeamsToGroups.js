@@ -46,9 +46,9 @@ const assignTeams =
          const round =
             await Round.findOne()
 
-            .sort({
-               roundNumber: 1,
-            });
+               .sort({
+                  roundNumber: 1,
+               });
 
          if (!round) {
 
@@ -88,10 +88,9 @@ const assignTeams =
             ) {
 
                const groupName =
-                  `Group ${
-                     String.fromCharCode(
-                        65 + groupIndex
-                     )
+                  `Group ${String.fromCharCode(
+                     65 + groupIndex
+                  )
                   }`;
 
                currentGroup =
@@ -131,6 +130,9 @@ const assignTeams =
 
             team.group =
                currentGroup._id;
+
+            team.currentRound =
+               round._id;
 
             await team.save();
 

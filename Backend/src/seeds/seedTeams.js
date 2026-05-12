@@ -123,7 +123,7 @@ const seedTeams =
 
          for (
             let i = 0;
-            i < 200;
+            i < 64;
             i++
          ) {
 
@@ -147,7 +147,7 @@ const seedTeams =
                   tournament._id,
 
                status:
-                  "verified",
+                  "pending",
 
             });
 
@@ -158,7 +158,7 @@ const seedTeams =
          );
 
          console.log(
-            "200 verified teams created"
+            "200 pending teams created"
          );
 
          process.exit();

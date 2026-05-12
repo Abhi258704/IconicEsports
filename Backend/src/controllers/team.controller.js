@@ -182,13 +182,19 @@ const verifyTeam = asyncHandler(
                activeRound._id,
          })
 
-         .populate("teams")
+            .populate("teams")
 
-         .sort({
-            createdAt: 1,
-         });
+            .sort({
+               createdAt: 1,
+            });
 
-      const TEAMS_PER_GROUP = 8;
+      const tournament =
+         await Tournament.findById(
+            team.tournament
+         );
+
+      const TEAMS_PER_GROUP =
+         tournament.teamsPerGroup || 16;
 
       if (
          !group ||
@@ -206,10 +212,9 @@ const verifyTeam = asyncHandler(
             });
 
          const groupName =
-            `Group ${
-               String.fromCharCode(
-                  65 + groupCount
-               )
+            `Group ${String.fromCharCode(
+               65 + groupCount
+            )
             }`;
 
          group =
@@ -245,6 +250,9 @@ const verifyTeam = asyncHandler(
 
       team.group =
          group._id;
+
+      team.currentRound =
+         activeRound._id;
 
       await team.save();
 
@@ -296,6 +304,56 @@ const rejectTeam = asyncHandler(
    }
 );
 
+const getTeamById = asyncHandler(
+   async (req, res) => {
+
+      const { teamId } =
+         req.params;
+
+      const team =
+         await Team.findById(
+            teamId
+         )
+
+            .populate({
+               path: "group",
+               populate: {
+                  path: "round", 
+               },
+            })
+
+            .populate("tournament")
+
+            .populate("currentRound")
+
+            .populate("eliminatedInRound")
+
+            .populate(
+               "registeredBy",
+               "email username"
+            );
+
+      if (!team) {
+
+         throw new ApiError(
+            404,
+            "Team not found"
+         );
+
+      }
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            team,
+            "Team fetched successfully"
+         )
+
+      );
+
+   }
+);
 
 
 
@@ -307,4 +365,5 @@ export {
    getTournamentTeams,
    verifyTeam,
    rejectTeam,
+   getTeamById,
 };

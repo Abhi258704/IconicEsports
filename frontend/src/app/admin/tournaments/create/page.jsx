@@ -39,6 +39,7 @@ export default function CreateTournamentPage() {
             rules: "",
             startDate: "",
             banner: null,
+            teamsPerGroup: 16,
         });
 
     const handleChange = (e) => {
@@ -272,6 +273,22 @@ export default function CreateTournamentPage() {
                         onChange={handleChange}
                     />
 
+                    <Input
+                        label="Teams Per Group"
+                        name="teamsPerGroup"
+                        type="number"
+                        value={formData.teamsPerGroup}
+                        onChange={handleChange}
+                    />
+
+                    <Input
+                        label="Start Date"
+                        name="startDate"
+                        type="date"
+                        value={formData.startDate}
+                        onChange={handleChange}
+                    />
+
                     <div className="md:col-span-2">
 
                         <label className="text-sm text-gray-400">
@@ -343,14 +360,6 @@ export default function CreateTournamentPage() {
                         </div>
 
                     </div>
-
-                    <Input
-                        label="Start Date"
-                        name="startDate"
-                        type="date"
-                        value={formData.startDate}
-                        onChange={handleChange}
-                    />
 
                 </div>
 
