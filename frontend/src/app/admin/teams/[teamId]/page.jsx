@@ -96,7 +96,7 @@ export default function TeamDetailsPage({
                 );
 
                 toast.success(
-                    "Team verified"
+                    `${team.teamName} verified successfully`
                 );
 
                 fetchTeam();
@@ -123,7 +123,7 @@ export default function TeamDetailsPage({
                 );
 
                 toast.success(
-                    "Team rejected"
+                    `${team.teamName} rejected`
                 );
 
                 fetchTeam();

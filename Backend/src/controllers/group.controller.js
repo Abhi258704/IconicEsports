@@ -270,139 +270,138 @@ const getGroupLeaderboard = asyncHandler(
 );
 
 const getGroupById = asyncHandler(
-      async (req, res) => {
+   async (req, res) => {
 
-         const { id } =
-            req.params;
+      const { id } =
+         req.params;
 
-         const group =
-            await Group.findById(id)
+      const group =
+         await Group.findById(id)
 
-               .populate("teams")
+            .populate("teams")
 
-               .populate("round");
+            .populate("round");
 
-         if (!group) {
+      if (!group) {
 
-            throw new ApiError(
-               404,
-               "Group not found"
-            );
-
-         }
-
-         return res.status(200).json(
-
-            new ApiResponse(
-               200,
-               group,
-               "Group fetched successfully"
-            )
-
+         throw new ApiError(
+            404,
+            "Group not found"
          );
 
       }
-   );
 
-const moveTeamToGroup = asyncHandler(
-      async (req, res) => {
+      return res.status(200).json(
 
-         const {
-            teamId,
-            fromGroupId,
-            toGroupId,
-         } = req.body;
+         new ApiResponse(
+            200,
+            group,
+            "Group fetched successfully"
+         )
 
-         if (
-            fromGroupId ===
-            toGroupId
-         ) {
+      );
 
-            throw new ApiError(
-               400,
-               "Source and target groups cannot be same"
-            );
+   }
+);
 
-         }
+const moveTeamsToGroup = asyncHandler(
+   async (req, res) => {
 
-         const fromGroup =
-            await Group.findById(
-               fromGroupId
-            );
+      const {
+         teamIds,
+         fromGroupId,
+         toGroupId,
+      } = req.body;
 
-         const toGroup =
-            await Group.findById(
-               toGroupId
-            );
+      if (
+         !teamIds?.length ||
+         !fromGroupId ||
+         !toGroupId
+      ) {
 
-         if (
-            !fromGroup ||
-            !toGroup
-         ) {
+         throw new ApiError(
+            400,
+            "Missing required fields"
+         );
 
-            throw new ApiError(
-               404,
-               "Group not found"
-            );
+      }
 
-         }
+      if (fromGroupId === toGroupId) {
 
-         if (
+         throw new ApiError(
+            400,
+            "Source and target groups cannot be same"
+         );
 
-            fromGroup.round.toString() !==
-            toGroup.round.toString()
+      }
 
-         ) {
+      const fromGroup =
+         await Group.findById(fromGroupId);
 
-            throw new ApiError(
-               400,
-               "Teams can only move within same round"
-            );
+      const toGroup =
+         await Group.findById(toGroupId);
 
-         }
+      if (!fromGroup || !toGroup) {
 
-         const alreadyExists =
+         throw new ApiError(
+            404,
+            "Group not found"
+         );
+
+      }
+
+      for (const teamId of teamIds) {
+
+         const exists =
             toGroup.teams.some(
                (id) =>
                   id.toString() ===
-                  teamId
+                  teamId.toString()
             );
 
-         if (alreadyExists) {
+         if (!exists) {
 
-            throw new ApiError(
-               400,
-               "Team already exists in target group"
-            );
+            toGroup.teams.push(teamId);
 
          }
 
-         fromGroup.teams =
-            fromGroup.teams.filter(
-               (id) =>
-                  id.toString() !==
-                  teamId
-            );
-
-         toGroup.teams.push(
-            teamId
-         );
-
-         await fromGroup.save();
-         await toGroup.save();
-
-         return res.status(200).json(
-
-            new ApiResponse(
-               200,
-               {},
-               "Team moved successfully"
-            )
-
-         );
-
       }
-   );
+
+      fromGroup.teams =
+         fromGroup.teams.filter(
+            (id) =>
+               !teamIds.some(
+                  (teamId) =>
+                     teamId.toString() ===
+                     id.toString()
+               )
+         );
+
+      await fromGroup.save();
+
+      await toGroup.save();
+
+      await Team.updateMany(
+         {
+            _id: { $in: teamIds }
+         },
+         {
+            group: toGroup._id
+         }
+      );
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            {},
+            "Teams moved successfully"
+         )
+
+      );
+
+   }
+);
 
 
 export {
@@ -410,5 +409,5 @@ export {
    getRoundGroups,
    getGroupLeaderboard,
    getGroupById,
-   moveTeamToGroup,
+   moveTeamsToGroup,
 };

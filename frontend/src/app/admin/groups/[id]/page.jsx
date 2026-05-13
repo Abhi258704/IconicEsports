@@ -12,6 +12,8 @@ import axios
 import Link
     from "next/link";
 
+import toast from "react-hot-toast";
+
 import {
     Users,
     ArrowLeft,
@@ -39,6 +41,12 @@ export default function GroupPage() {
 
     const [targetGroup, setTargetGroup] =
         useState("");
+
+    const [showConfirm, setShowConfirm] =
+        useState(false);
+
+    const [moving, setMoving] =
+        useState(false);
 
     const fetchGroup =
         async () => {
@@ -85,25 +93,56 @@ export default function GroupPage() {
 
     }, [id]);
 
+    const toggleTeamSelection =
+        (teamId) => {
+
+            const exists =
+                selectedTeams.includes(
+                    teamId
+                );
+
+            if (exists) {
+
+                setSelectedTeams(
+                    selectedTeams.filter(
+                        (id) =>
+                            id !== teamId
+                    )
+                );
+
+            } else {
+
+                setSelectedTeams(
+                    [
+                        ...selectedTeams,
+                        teamId,
+                    ]
+                );
+
+            }
+
+        };
+
     const moveSelectedTeams =
         async () => {
 
             try {
 
-                for (const teamId of selectedTeams) {
+                setMoving(true);
 
-                    await axios.patch(
-                        "/groups/move-team",
-                        {
-                            teamId,
-                            fromGroupId:
-                                group._id,
-                            toGroupId:
-                                targetGroup,
-                        }
-                    );
+                await axios.patch(
+                    "/groups/move-teams",
+                    {
+                        teamIds:
+                            selectedTeams,
 
-                }
+                        fromGroupId:
+                            group._id,
+
+                        toGroupId:
+                            targetGroup,
+                    }
+                );
 
                 setSelectedTeams([]);
 
@@ -111,11 +150,24 @@ export default function GroupPage() {
 
                 setSelectionMode(false);
 
+                setShowConfirm(false);
+
+                toast.success(
+                    `${selectedTeams.length} ${selectedTeams.length > 1
+                        ? "teams"
+                        : "team"
+                    } moved successfully`
+                );
+
                 fetchGroup();
 
             } catch (error) {
 
                 console.log(error);
+
+            } finally {
+
+                setMoving(false);
 
             }
 
@@ -227,6 +279,36 @@ export default function GroupPage() {
 
                                 </Link>
 
+                                <button
+                                    onClick={() => {
+
+                                        if (selectionMode) {
+
+                                            setSelectedTeams([]);
+
+                                            setTargetGroup("");
+
+                                        }
+
+                                        setSelectionMode(
+                                            !selectionMode
+                                        );
+
+                                    }}
+                                    className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition hover:scale-105 ${selectionMode
+                                        ? "bg-gradient-to-r from-red-500 to-pink-500"
+                                        : "bg-gradient-to-r from-purple-500 to-cyan-500"
+                                        }`}
+                                >
+
+                                    {
+                                        selectionMode
+                                            ? "Cancel Move"
+                                            : "Move Teams"
+                                    }
+
+                                </button>
+
                             </div>
 
                         </div>
@@ -245,38 +327,15 @@ export default function GroupPage() {
 
                 <div className="mt-12">
 
-                    <div className="flex items-center justify-between">
+                    <div>
 
-                        <div>
+                        <p className="uppercase tracking-[0.3em] text-xs text-cyan-400">
+                            Team Management
+                        </p>
 
-                            <p className="uppercase tracking-[0.3em] text-xs text-cyan-400">
-                                Team Management
-                            </p>
-
-                            <h2 className="mt-2 text-4xl font-black text-white">
-                                Teams
-                            </h2>
-
-                        </div>
-
-                        <button
-                            onClick={() =>
-                                setSelectionMode(
-                                    !selectionMode
-                                )
-                            }
-                            className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                        >
-
-                            {
-                                selectionMode
-
-                                    ? "Cancel"
-
-                                    : "Move Teams"
-                            }
-
-                        </button>
+                        <h2 className="mt-2 text-4xl font-black text-white">
+                            Teams
+                        </h2>
 
                     </div>
 
@@ -312,49 +371,91 @@ export default function GroupPage() {
 
                                                 <div
                                                     key={team._id}
-                                                    className="rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8 transition hover:border-cyan-400/40 hover:bg-cyan-500/[0.05]"
+                                                    onClick={() => {
+
+                                                        if (selectionMode) {
+
+                                                            toggleTeamSelection(
+                                                                team._id
+                                                            );
+
+                                                        }
+
+                                                    }}
+                                                    className={`rounded-3xl border p-8 transition ${selectionMode
+                                                        ? "cursor-pointer"
+                                                        : ""
+                                                        } ${selectedTeams.includes(
+                                                            team._id
+                                                        )
+                                                            ? "border-cyan-400 bg-cyan-500/10"
+                                                            : "border-cyan-500/20 bg-white/[0.03]"
+                                                        } hover:border-cyan-400/40 hover:bg-cyan-500/[0.05]`}
                                                 >
 
                                                     {
                                                         selectionMode ? (
 
-                                                            <div className="flex justify-end">
+                                                            <div>
 
-                                                                <input
-                                                                    type="checkbox"
-                                                                    checked={
-                                                                        selectedTeams.includes(
+                                                                <div className="flex justify-end">
+
+                                                                    <div
+                                                                        className={`h-6 w-6 rounded-lg border-2 transition ${selectedTeams.includes(
                                                                             team._id
                                                                         )
-                                                                    }
-                                                                    onChange={(e) => {
+                                                                            ? "border-cyan-400 bg-cyan-400"
+                                                                            : "border-white/20"
+                                                                            }`}
+                                                                    />
 
-                                                                        if (
-                                                                            e.target.checked
-                                                                        ) {
+                                                                </div>
 
-                                                                            setSelectedTeams(
-                                                                                [
-                                                                                    ...selectedTeams,
-                                                                                    team._id,
-                                                                                ]
-                                                                            );
+                                                                <div className="flex items-start justify-between gap-4">
 
-                                                                        } else {
+                                                                    <div>
 
-                                                                            setSelectedTeams(
-                                                                                selectedTeams.filter(
-                                                                                    (id) =>
-                                                                                        id !==
-                                                                                        team._id
-                                                                                )
-                                                                            );
+                                                                        <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
+                                                                            Team
+                                                                        </p>
 
-                                                                        }
+                                                                        <h2 className="mt-3 text-3xl font-black text-white">
 
-                                                                    }}
-                                                                    className="h-5 w-5 accent-cyan-500"
-                                                                />
+                                                                            {team.teamName}
+
+                                                                        </h2>
+
+                                                                    </div>
+
+                                                                    <div className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-bold text-green-300">
+
+                                                                        {team.status}
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div className="mt-8 space-y-3 text-gray-300">
+
+                                                                    <p>
+
+                                                                        Leader:
+                                                                        {" "}
+
+                                                                        {team.leaderName}
+
+                                                                    </p>
+
+                                                                    <p>
+
+                                                                        Phone:
+                                                                        {" "}
+
+                                                                        {team.leaderPhone}
+
+                                                                    </p>
+
+                                                                </div>
 
                                                             </div>
 
@@ -411,62 +512,6 @@ export default function GroupPage() {
                                                                 </div>
 
                                                             </Link>
-
-                                                        )
-                                                    }
-
-                                                    {
-                                                        selectionMode && (
-
-                                                            <div>
-
-                                                                <div className="flex items-start justify-between gap-4">
-
-                                                                    <div>
-
-                                                                        <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
-                                                                            Team
-                                                                        </p>
-
-                                                                        <h2 className="mt-3 text-3xl font-black text-white">
-
-                                                                            {team.teamName}
-
-                                                                        </h2>
-
-                                                                    </div>
-
-                                                                    <div className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-bold text-green-300">
-
-                                                                        {team.status}
-
-                                                                    </div>
-
-                                                                </div>
-
-                                                                <div className="mt-8 space-y-3 text-gray-300">
-
-                                                                    <p>
-
-                                                                        Leader:
-                                                                        {" "}
-
-                                                                        {team.leaderName}
-
-                                                                    </p>
-
-                                                                    <p>
-
-                                                                        Phone:
-                                                                        {" "}
-
-                                                                        {team.leaderPhone}
-
-                                                                    </p>
-
-                                                                </div>
-
-                                                            </div>
 
                                                         )
                                                     }
@@ -528,11 +573,14 @@ export default function GroupPage() {
                                                     !targetGroup ||
                                                     selectedTeams.length === 0
                                                 }
-                                                onClick={moveSelectedTeams}
+                                                onClick={() =>
+                                                    setShowConfirm(true)
+                                                }
                                                 className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
 
                                                 Move Selected
+
                                             </button>
 
                                         </div>
@@ -548,6 +596,65 @@ export default function GroupPage() {
                 </div>
 
             </div>
+
+            {
+                showConfirm && (
+
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+
+                        <div className="w-full max-w-md rounded-3xl border border-cyan-500/20 bg-[#0a0a0a] p-8">
+
+                            <h2 className="text-3xl font-black text-white">
+
+                                Confirm Move
+
+                            </h2>
+
+                            <p className="mt-4 text-gray-400">
+
+                                Move
+                                {" "}
+                                {selectedTeams.length}
+                                {" "}
+                                teams to selected group?
+
+                            </p>
+
+                            <div className="mt-8 flex gap-4">
+
+                                <button
+                                    onClick={() =>
+                                        setShowConfirm(false)
+                                    }
+                                    className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 font-bold text-white"
+                                >
+
+                                    Cancel
+
+                                </button>
+
+                                <button
+                                    disabled={moving}
+                                    onClick={moveSelectedTeams}
+                                    className="flex-1 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white disabled:opacity-50"
+                                >
+
+                                    {
+                                        moving
+                                            ? "Moving..."
+                                            : "Confirm"
+                                    }
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )
+            }
 
         </div>
 

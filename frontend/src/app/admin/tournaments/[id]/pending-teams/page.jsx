@@ -121,7 +121,7 @@ export default function PendingTeamsPage({
             );
 
             toast.success(
-               "Team verified successfully"
+               `${selectedTeam.teamName} verified successfully`
             );
 
             setTeams((prev) =>
@@ -153,7 +153,7 @@ export default function PendingTeamsPage({
             );
 
             toast.success(
-               "Team rejected"
+               `${selectedTeam.teamName} rejected`
             );
 
             setTeams((prev) =>
