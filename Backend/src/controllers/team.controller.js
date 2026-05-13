@@ -303,9 +303,20 @@ const verifyTeam = asyncHandler(
 
          if (!alreadyExists) {
 
-            group.teams.push(
-               team._id
-            );
+            group.teams = [
+
+               ...new Set([
+
+                  ...group.teams.map(
+                     (id) =>
+                        id.toString()
+                  ),
+
+                  team._id.toString(),
+
+               ]),
+
+            ];
 
          }
 

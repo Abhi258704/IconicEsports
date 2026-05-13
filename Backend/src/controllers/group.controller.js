@@ -304,6 +304,105 @@ const getGroupById = asyncHandler(
       }
    );
 
+const moveTeamToGroup = asyncHandler(
+      async (req, res) => {
+
+         const {
+            teamId,
+            fromGroupId,
+            toGroupId,
+         } = req.body;
+
+         if (
+            fromGroupId ===
+            toGroupId
+         ) {
+
+            throw new ApiError(
+               400,
+               "Source and target groups cannot be same"
+            );
+
+         }
+
+         const fromGroup =
+            await Group.findById(
+               fromGroupId
+            );
+
+         const toGroup =
+            await Group.findById(
+               toGroupId
+            );
+
+         if (
+            !fromGroup ||
+            !toGroup
+         ) {
+
+            throw new ApiError(
+               404,
+               "Group not found"
+            );
+
+         }
+
+         if (
+
+            fromGroup.round.toString() !==
+            toGroup.round.toString()
+
+         ) {
+
+            throw new ApiError(
+               400,
+               "Teams can only move within same round"
+            );
+
+         }
+
+         const alreadyExists =
+            toGroup.teams.some(
+               (id) =>
+                  id.toString() ===
+                  teamId
+            );
+
+         if (alreadyExists) {
+
+            throw new ApiError(
+               400,
+               "Team already exists in target group"
+            );
+
+         }
+
+         fromGroup.teams =
+            fromGroup.teams.filter(
+               (id) =>
+                  id.toString() !==
+                  teamId
+            );
+
+         toGroup.teams.push(
+            teamId
+         );
+
+         await fromGroup.save();
+         await toGroup.save();
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               {},
+               "Team moved successfully"
+            )
+
+         );
+
+      }
+   );
 
 
 export {
@@ -311,4 +410,5 @@ export {
    getRoundGroups,
    getGroupLeaderboard,
    getGroupById,
+   moveTeamToGroup,
 };

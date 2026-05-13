@@ -98,9 +98,8 @@ export default function RoundDetailsPage({
 
             {/* HEADER */}
 
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-
-                <div>
+            <div className="rounded-3xl border border-purple-500/20 bg-white/[0.03] p-8">
+                <div className="flex flex-col gap-6">
 
                     <Link
                         href={
@@ -108,7 +107,7 @@ export default function RoundDetailsPage({
                                 ? `/admin/tournaments/${round.tournament}/rounds`
                                 : "/admin/tournaments"
                         }
-                        className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-purple-500/30 hover:bg-purple-500/10 hover:text-white"
+                        className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-purple-500/30 hover:bg-purple-500/10 hover:text-white"
                     >
 
                         <ArrowLeft size={18} />
@@ -117,92 +116,141 @@ export default function RoundDetailsPage({
 
                     </Link>
 
-                    <p className="mt-6 uppercase tracking-[0.3em] text-sm text-purple-400">
-                        Round Management
-                    </p>
+                    <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
 
-                    <h1 className="mt-3 text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
-                        {round.name}
-                    </h1>
+                        {/* LEFT */}
+
+                        <div>
+
+                            <p className="uppercase tracking-[0.3em] text-sm text-purple-400">
+                                Round Management
+                            </p>
+
+                            <h1 className="mt-3 text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
+
+                                {round.name}
+
+                            </h1>
+
+                        </div>
+
+                        {/* RIGHT */}
+
+                        <div className="flex flex-wrap gap-4">
+
+                            {/* QUALIFICATION */}
+
+                            <div className="rounded-2xl border border-purple-500/20 bg-white/[0.03] px-5 py-4">
+
+                                <div className="flex items-center gap-3">
+
+                                    <Trophy
+                                        size={22}
+                                        className="text-purple-400"
+                                    />
+
+                                    <div>
+
+                                        <p className="text-xs text-gray-400">
+                                            Qualification
+                                        </p>
+
+                                        <h2 className="text-2xl font-black text-white">
+
+                                            {round.qualificationCount}
+
+                                        </h2>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {/* GROUPS */}
+
+                            <div className="rounded-2xl border border-cyan-500/20 bg-white/[0.03] px-5 py-4">
+
+                                <div className="flex items-center gap-3">
+
+                                    <Layers3
+                                        size={22}
+                                        className="text-cyan-400"
+                                    />
+
+                                    <div>
+
+                                        <p className="text-xs text-gray-400">
+                                            Groups
+                                        </p>
+
+                                        <h2 className="text-2xl font-black text-white">
+
+                                            {round.groups?.length || 0}
+
+                                        </h2>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {/* STATUS */}
+
+                            <div className="rounded-2xl border border-pink-500/20 bg-white/[0.03] px-5 py-4">
+
+                                <div className="flex items-center gap-3">
+
+                                    <Users
+                                        size={22}
+                                        className="text-pink-400"
+                                    />
+
+                                    <div>
+
+                                        <p className="text-xs text-gray-400">
+                                            Status
+                                        </p>
+
+                                        <h2 className="text-xl font-black text-white">
+
+                                            {round.status}
+
+                                        </h2>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {/* EDIT */}
+
+                            {/* <Link
+                                href={`/admin/rounds/${round._id}/edit`}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                            >
+
+                                <Plus size={20} />
+
+                                Edit Round (baki hh)
+
+                            </Link> */}
+
+                        </div>
+
+                    </div>
 
                 </div>
-
-                {/* <button
-                    className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                >
-
-                    <Plus size={20} />
-
-                    Create Group
-
-                </button> */}
-
             </div>
-
             {/* SCROLL */}
 
-            <div className="mt-10 flex-1 overflow-y-auto pr-2">
-
-                {/* STATS */}
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-                    <div className="rounded-3xl border border-purple-500/20 bg-white/[0.03] p-8">
-
-                        <Trophy
-                            size={40}
-                            className="text-purple-400"
-                        />
-
-                        <h2 className="mt-5 text-4xl font-black text-white">
-                            {round.qualificationCount}
-                        </h2>
-
-                        <p className="mt-2 text-gray-400">
-                            Qualification Count
-                        </p>
-
-                    </div>
-
-                    <div className="rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8">
-
-                        <Layers3
-                            size={40}
-                            className="text-cyan-400"
-                        />
-
-                        <h2 className="mt-5 text-4xl font-black text-white">
-                            {round.groups?.length || 0}
-                        </h2>
-
-                        <p className="mt-2 text-gray-400">
-                            Total Groups
-                        </p>
-
-                    </div>
-
-                    <div className="rounded-3xl border border-pink-500/20 bg-white/[0.03] p-8">
-
-                        <Users
-                            size={40}
-                            className="text-pink-400"
-                        />
-
-                        <h2 className="mt-5 text-4xl font-black text-white">
-                            {round.status}
-                        </h2>
-
-                        <p className="mt-2 text-gray-400">
-                            Round Status
-                        </p>
-
-                    </div>
-
-                </div>
+            <div className="mt-2 flex-1 overflow-y-auto pr-2">
 
                 {/* GROUPS */}
 
-                <div className="mt-12">
+                <div className="mt-2">
 
                     <div className="flex items-center justify-between">
 

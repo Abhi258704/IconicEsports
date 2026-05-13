@@ -14,7 +14,6 @@ import Link
 
 import {
     Users,
-    Trophy,
     ArrowLeft,
 } from "lucide-react";
 
@@ -26,8 +25,20 @@ export default function GroupPage() {
     const [group, setGroup] =
         useState(null);
 
+    const [allGroups, setAllGroups] =
+        useState([]);
+
     const [loading, setLoading] =
         useState(true);
+
+    const [selectionMode, setSelectionMode] =
+        useState(false);
+
+    const [selectedTeams, setSelectedTeams] =
+        useState([]);
+
+    const [targetGroup, setTargetGroup] =
+        useState("");
 
     const fetchGroup =
         async () => {
@@ -41,6 +52,15 @@ export default function GroupPage() {
 
                 setGroup(
                     res.data.data
+                );
+
+                const groupsRes =
+                    await axios.get(
+                        `/rounds/${res.data.data.round._id}`
+                    );
+
+                setAllGroups(
+                    groupsRes.data.data.groups || []
                 );
 
             } catch (error) {
@@ -64,6 +84,42 @@ export default function GroupPage() {
         }
 
     }, [id]);
+
+    const moveSelectedTeams =
+        async () => {
+
+            try {
+
+                for (const teamId of selectedTeams) {
+
+                    await axios.patch(
+                        "/groups/move-team",
+                        {
+                            teamId,
+                            fromGroupId:
+                                group._id,
+                            toGroupId:
+                                targetGroup,
+                        }
+                    );
+
+                }
+
+                setSelectedTeams([]);
+
+                setTargetGroup("");
+
+                setSelectionMode(false);
+
+                fetchGroup();
+
+            } catch (error) {
+
+                console.log(error);
+
+            }
+
+        };
 
     if (loading) {
 
@@ -118,58 +174,62 @@ export default function GroupPage() {
                         Group Management
                     </p>
 
-                    <div className="mt-3 flex flex-col xl:flex-row xl:items-center gap-5">
+                    <div className="mt-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
 
-                        <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
+                        <div className="flex flex-col xl:flex-row xl:items-center gap-5">
 
-                            {group.name}
+                            <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
 
-                        </h1>
+                                {group.name}
 
-                        <div className="flex flex-wrap gap-4">
+                            </h1>
 
-                            <div className="rounded-2xl border border-cyan-500/20 bg-white/[0.03] px-5 py-3">
+                            <div className="flex flex-wrap gap-4">
 
-                                <p className="text-xs text-gray-400">
+                                <div className="rounded-2xl border border-cyan-500/20 bg-white/[0.03] px-5 py-3">
 
-                                    Teams
+                                    <p className="text-xs text-gray-400">
 
-                                </p>
+                                        Teams
 
-                                <h2 className="text-2xl font-black text-white">
+                                    </p>
 
-                                    {group.teams?.length || 0}
+                                    <h2 className="text-2xl font-black text-white">
 
-                                </h2>
+                                        {group.teams?.length || 0}
 
-                            </div>
+                                    </h2>
 
-                            <div className="rounded-2xl border border-purple-500/20 bg-white/[0.03] px-5 py-3">
+                                </div>
 
-                                <p className="text-xs text-gray-400">
+                                <div className="rounded-2xl border border-purple-500/20 bg-white/[0.03] px-5 py-3">
 
-                                    Round
+                                    <p className="text-xs text-gray-400">
 
-                                </p>
+                                        Round
 
-                                <h2 className="text-xl font-black text-white">
+                                    </p>
 
-                                    {group.round?.name}
+                                    <h2 className="text-xl font-black text-white">
 
-                                </h2>
+                                        {group.round?.name}
+
+                                    </h2>
+
+                                </div>
+
+                                <Link
+                                    href={`/admin/groups/${group._id}/slots`}
+                                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                                >
+
+                                    Manage Slots
+
+                                </Link>
 
                             </div>
 
                         </div>
-
-                        <Link
-                            href={`/admin/groups/${group._id}/slots`}
-                            className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                        >
-
-                            Manage Slots
-
-                        </Link>
 
                     </div>
 
@@ -179,7 +239,7 @@ export default function GroupPage() {
 
             {/* SCROLL */}
 
-            <div className="mt-10 flex-1 overflow-y-auto pr-2">
+            <div className="mt-8 flex-1 overflow-y-auto pr-2">
 
                 {/* TEAMS */}
 
@@ -198,6 +258,25 @@ export default function GroupPage() {
                             </h2>
 
                         </div>
+
+                        <button
+                            onClick={() =>
+                                setSelectionMode(
+                                    !selectionMode
+                                )
+                            }
+                            className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                        >
+
+                            {
+                                selectionMode
+
+                                    ? "Cancel"
+
+                                    : "Move Teams"
+                            }
+
+                        </button>
 
                     </div>
 
@@ -223,71 +302,245 @@ export default function GroupPage() {
 
                         ) : (
 
-                            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                            <>
+
+                                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+
+                                    {
+                                        group.teams?.map(
+                                            (team) => (
+
+                                                <div
+                                                    key={team._id}
+                                                    className="rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8 transition hover:border-cyan-400/40 hover:bg-cyan-500/[0.05]"
+                                                >
+
+                                                    {
+                                                        selectionMode ? (
+
+                                                            <div className="flex justify-end">
+
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={
+                                                                        selectedTeams.includes(
+                                                                            team._id
+                                                                        )
+                                                                    }
+                                                                    onChange={(e) => {
+
+                                                                        if (
+                                                                            e.target.checked
+                                                                        ) {
+
+                                                                            setSelectedTeams(
+                                                                                [
+                                                                                    ...selectedTeams,
+                                                                                    team._id,
+                                                                                ]
+                                                                            );
+
+                                                                        } else {
+
+                                                                            setSelectedTeams(
+                                                                                selectedTeams.filter(
+                                                                                    (id) =>
+                                                                                        id !==
+                                                                                        team._id
+                                                                                )
+                                                                            );
+
+                                                                        }
+
+                                                                    }}
+                                                                    className="h-5 w-5 accent-cyan-500"
+                                                                />
+
+                                                            </div>
+
+                                                        ) : (
+
+                                                            <Link
+                                                                href={`/admin/teams/${team._id}?from=group&groupId=${group._id}`}
+                                                            >
+
+                                                                <div className="flex items-start justify-between gap-4">
+
+                                                                    <div>
+
+                                                                        <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
+                                                                            Team
+                                                                        </p>
+
+                                                                        <h2 className="mt-3 text-3xl font-black text-white">
+
+                                                                            {team.teamName}
+
+                                                                        </h2>
+
+                                                                    </div>
+
+                                                                    <div className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-bold text-green-300">
+
+                                                                        {team.status}
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div className="mt-8 space-y-3 text-gray-300">
+
+                                                                    <p>
+
+                                                                        Leader:
+                                                                        {" "}
+
+                                                                        {team.leaderName}
+
+                                                                    </p>
+
+                                                                    <p>
+
+                                                                        Phone:
+                                                                        {" "}
+
+                                                                        {team.leaderPhone}
+
+                                                                    </p>
+
+                                                                </div>
+
+                                                            </Link>
+
+                                                        )
+                                                    }
+
+                                                    {
+                                                        selectionMode && (
+
+                                                            <div>
+
+                                                                <div className="flex items-start justify-between gap-4">
+
+                                                                    <div>
+
+                                                                        <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
+                                                                            Team
+                                                                        </p>
+
+                                                                        <h2 className="mt-3 text-3xl font-black text-white">
+
+                                                                            {team.teamName}
+
+                                                                        </h2>
+
+                                                                    </div>
+
+                                                                    <div className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-bold text-green-300">
+
+                                                                        {team.status}
+
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div className="mt-8 space-y-3 text-gray-300">
+
+                                                                    <p>
+
+                                                                        Leader:
+                                                                        {" "}
+
+                                                                        {team.leaderName}
+
+                                                                    </p>
+
+                                                                    <p>
+
+                                                                        Phone:
+                                                                        {" "}
+
+                                                                        {team.leaderPhone}
+
+                                                                    </p>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        )
+                                                    }
+
+                                                </div>
+
+                                            )
+                                        )
+                                    }
+
+                                </div>
 
                                 {
-                                    group.teams?.map(
-                                        (team) => (
+                                    selectionMode && (
 
-                                            <Link
-                                                key={team._id}
-                                                href={`/admin/teams/${team._id}?from=group&groupId=${group._id}`}
-                                                className="rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8 transition hover:border-cyan-400/40 hover:bg-cyan-500/[0.05]"
+                                        <div className="sticky bottom-0 mt-10 flex items-center gap-4 rounded-3xl border border-cyan-500/20 bg-[#0a0a0a]/95 p-6 backdrop-blur-xl">
+
+                                            <select
+                                                value={targetGroup}
+                                                onChange={(e) =>
+                                                    setTargetGroup(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                className="rounded-2xl border border-cyan-500/20 bg-black/40 px-5 py-4 text-white outline-none"
                                             >
 
-                                                <div className="flex items-start justify-between gap-4">
+                                                <option value="">
 
-                                                    <div>
+                                                    Select Group
 
-                                                        <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
-                                                            Team
-                                                        </p>
+                                                </option>
 
-                                                        <h2 className="mt-3 text-3xl font-black text-white">
+                                                {
+                                                    allGroups
+                                                        .filter(
+                                                            (g) =>
+                                                                g._id !==
+                                                                group._id
+                                                        )
+                                                        .map((g) => (
 
-                                                            {team.teamName}
+                                                            <option
+                                                                key={g._id}
+                                                                value={g._id}
+                                                            >
 
-                                                        </h2>
+                                                                {g.name}
 
-                                                    </div>
+                                                            </option>
 
-                                                    <div className="rounded-2xl bg-green-500/20 px-4 py-2 text-sm font-bold text-green-300">
+                                                        ))
+                                                }
 
-                                                        {team.status}
+                                            </select>
 
-                                                    </div>
+                                            <button
+                                                disabled={
+                                                    !targetGroup ||
+                                                    selectedTeams.length === 0
+                                                }
+                                                onClick={moveSelectedTeams}
+                                                className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
 
-                                                </div>
+                                                Move Selected
+                                            </button>
 
-                                                <div className="mt-8 space-y-3 text-gray-300">
+                                        </div>
 
-                                                    <p>
-
-                                                        Leader:
-                                                        {" "}
-
-                                                        {team.leaderName}
-
-                                                    </p>
-
-                                                    <p>
-
-                                                        Phone:
-                                                        {" "}
-
-                                                        {team.leaderPhone}
-
-                                                    </p>
-
-                                                </div>
-
-                                            </Link>
-
-                                        )
                                     )
                                 }
 
-                            </div>
+                            </>
 
                         )
                     }

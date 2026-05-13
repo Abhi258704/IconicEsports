@@ -5,6 +5,7 @@ import {
    getRoundGroups,
    getGroupLeaderboard,
    getGroupById,
+   moveTeamToGroup,
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
@@ -38,6 +39,11 @@ router.get(
 router.get(
    "/:id",
    getGroupById
+);
+
+router.patch(
+   "/move-team",
+   moveTeamToGroup
 );
 
 
