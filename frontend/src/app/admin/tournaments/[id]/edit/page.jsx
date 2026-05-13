@@ -294,13 +294,13 @@ export default function EditTournamentPage({
                      onChange={handleChange}
                   />
 
-                  <Input
+                  {/* <Input
                      label="Teams Per Group"
                      name="teamsPerGroup"
                      type="number"
                      value={formData.teamsPerGroup}
                      onChange={handleChange}
-                  />
+                  /> */}
 
                   <div>
 

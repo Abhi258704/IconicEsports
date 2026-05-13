@@ -13,8 +13,8 @@ const groupSchema = new mongoose.Schema(
     },
 
     round: {
-   type: mongoose.Schema.Types.ObjectId,
-   ref: "Round",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Round",
     },
 
     maxTeams: {
@@ -28,6 +28,7 @@ const groupSchema = new mongoose.Schema(
         ref: "Team",
       },
     ],
+
   },
   {
     timestamps: true,

@@ -377,7 +377,7 @@ export default function PendingTeamsPage({
 
                                        </button>
 
-                                       <button
+                                       {/* <button
                                           onClick={() => {
 
                                              setSelectedTeam(team);
@@ -398,7 +398,7 @@ export default function PendingTeamsPage({
 
                                           Reject
 
-                                       </button>
+                                       </button> */}
 
                                     </div>
 

@@ -13,48 +13,44 @@ import {
     Pencil,
     Trash2,
     ArrowLeft,
-    Trophy,
     CalendarDays,
-    Users,
     Layers3,
 } from "lucide-react";
 
 import API from "@/lib/axios";
-import { useRouter }
-    from "next/navigation";
+
+import {
+    useRouter,
+} from "next/navigation";
 
 export default function TournamentDetailsPage({
     params,
 }) {
 
-    const router = useRouter();
+    const router =
+        useRouter();
 
-    const { id } = use(params);
+    const { id } =
+        use(params);
 
     const [stats, setStats] =
         useState(null);
 
-    const [deleteModal, setDeleteModal] =
+    const [deleteModal,
+        setDeleteModal] =
         useState(false);
 
-    const [tournament, setTournament] =
+    const [tournament,
+        setTournament] =
         useState(null);
 
-    const [loading, setLoading] =
+    const [loading,
+        setLoading] =
         useState(true);
-
-    const [groups, setGroups] =
-        useState([]);
-
-    const [pendingTeams,
-        setPendingTeams] =
-        useState([]);
 
     useEffect(() => {
 
         fetchTournament();
-
-        fetchTeamsData();
 
     }, []);
 
@@ -109,32 +105,6 @@ export default function TournamentDetailsPage({
 
         };
 
-    const fetchTeamsData =
-        async () => {
-
-            try {
-
-                const res =
-                    await API.get(
-                        `/tournaments/${id}/teams-data`
-                    );
-
-                setGroups(
-                    res.data.data.groups
-                );
-
-                setPendingTeams(
-                    res.data.data.pendingTeams
-                );
-
-            } catch (error) {
-
-                console.log(error);
-
-            }
-
-        };
-
     if (loading) {
 
         return (
@@ -159,8 +129,6 @@ export default function TournamentDetailsPage({
 
                 <div className="space-y-5">
 
-                    {/* BACK BUTTON */}
-
                     <Link
                         href="/admin/tournaments"
                         className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-purple-500/30 hover:bg-purple-500/10 hover:text-white"
@@ -171,8 +139,6 @@ export default function TournamentDetailsPage({
                         Back to Tournaments
 
                     </Link>
-
-                    {/* BANNER */}
 
                     <div className="relative aspect-square overflow-hidden rounded-3xl border border-purple-500/20">
 
@@ -205,11 +171,7 @@ export default function TournamentDetailsPage({
 
                         </div>
 
-                        {/* ACTIONS */}
-
                         <div className="flex items-center gap-3">
-
-                            {/* EDIT */}
 
                             <button
                                 onClick={() =>
@@ -226,11 +188,11 @@ export default function TournamentDetailsPage({
 
                             </button>
 
-                            {/* DELETE */}
-
                             <button
                                 onClick={() =>
-                                    setDeleteModal(true)
+                                    setDeleteModal(
+                                        true
+                                    )
                                 }
                                 className="flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 text-sm font-bold text-red-400 transition hover:bg-red-500/20"
                             >
@@ -332,7 +294,11 @@ export default function TournamentDetailsPage({
                             <Layers3 size={18} />
 
                             <span>
-                                {tournament.rounds.length} Rounds
+                                {
+                                    tournament.rounds.length
+                                }
+                                {" "}
+                                Rounds
                             </span>
 
                         </div>
@@ -343,11 +309,9 @@ export default function TournamentDetailsPage({
 
             </div>
 
-            {/* ROUND MANAGEMENT */}
+            {/* ACTIONS */}
 
             <div className="mt-12 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
-                {/* ACTIONS */}
 
                 <div className="flex flex-wrap gap-5">
 
@@ -382,8 +346,6 @@ export default function TournamentDetailsPage({
 
                 </div>
 
-                {/* STATUS */}
-
                 <div className="lg:text-right">
 
                     <p className="uppercase tracking-[0.25em] text-xs text-gray-400">
@@ -393,18 +355,19 @@ export default function TournamentDetailsPage({
                     <div
                         className={`mt-3 inline-flex rounded-2xl px-5 py-3 text-sm font-bold
 
-         ${tournament.status ===
-                                "ongoing"
+                        ${
+                            tournament.status ===
+                            "ongoing"
 
                                 ? "bg-green-500/20 text-green-400"
 
                                 : tournament.status ===
-                                    "completed"
+                                  "completed"
 
-                                    ? "bg-red-500/20 text-red-400"
+                                ? "bg-red-500/20 text-red-400"
 
-                                    : "bg-yellow-500/20 text-yellow-400"
-                            }`}
+                                : "bg-yellow-500/20 text-yellow-400"
+                        }`}
                     >
 
                         {tournament.status}
@@ -442,18 +405,26 @@ export default function TournamentDetailsPage({
 
                                 <button
                                     onClick={() =>
-                                        setDeleteModal(false)
+                                        setDeleteModal(
+                                            false
+                                        )
                                     }
                                     className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
                                 >
+
                                     Cancel
+
                                 </button>
 
                                 <button
-                                    onClick={handleDelete}
+                                    onClick={
+                                        handleDelete
+                                    }
                                     className="flex-1 rounded-2xl bg-red-500 px-5 py-4 font-bold text-white transition hover:bg-red-400"
                                 >
+
                                     Delete
+
                                 </button>
 
                             </div>

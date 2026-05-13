@@ -11,12 +11,20 @@ from "../models/team.model.js";
 import Tournament
 from "../models/tournament.model.js";
 
-import { DB_NAME } from "../constants.js";
+import Group
+from "../models/group.model.js";
 
+import Round
+from "../models/round.model.js";
+
+import { DB_NAME }
+from "../constants.js";
 
 dotenv.config();
 
-await mongoose.connect(`${process.env.MONGODB_URL}/${DB_NAME}`);
+await mongoose.connect(
+   `${process.env.MONGODB_URL}/${DB_NAME}`
+);
 
 const TEAM_PREFIXES = [
    "Team",
@@ -72,7 +80,7 @@ const generatePlayers =
 
       return Array.from(
          { length: 4 },
-         (_, i) => ({
+         () => ({
 
             ign:
                faker.internet.username(),
@@ -112,12 +120,44 @@ const seedTeams =
 
          }
 
-         /* DELETE OLD */
+         /* RESET TOURNAMENT STATE */
 
          await Team.deleteMany({
+
             tournament:
                tournament._id,
+
          });
+
+         await Group.deleteMany({
+
+            tournament:
+               tournament._id,
+
+         });
+
+         await Round.updateMany(
+
+            {
+
+               tournament:
+                  tournament._id,
+
+            },
+
+            {
+
+               $set: {
+
+                  groups: [],
+
+               },
+
+            }
+
+         );
+
+         /* CREATE PENDING TEAMS */
 
          const teams = [];
 
@@ -158,7 +198,7 @@ const seedTeams =
          );
 
          console.log(
-            "200 pending teams created"
+            `${teams.length} pending teams created`
          );
 
          process.exit();

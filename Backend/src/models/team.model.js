@@ -76,13 +76,19 @@ const teamSchema = new mongoose.Schema(
 );
 
 teamSchema.index(
-  {
-    tournament: 1,
-    registeredBy: 1,
-  },
-  {
-    unique: true,
-  }
+   {
+      tournament: 1,
+      registeredBy: 1,
+   },
+   {
+      unique: true,
+
+      partialFilterExpression: {
+         registeredBy: {
+            $exists: true,
+         },
+      },
+   }
 );
 
 

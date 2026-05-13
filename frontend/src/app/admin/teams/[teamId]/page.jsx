@@ -6,15 +6,23 @@ import {
     useState,
 } from "react";
 
+import {
+    useSearchParams,
+} from "next/navigation";
+
 import Link from "next/link";
 
 import {
     ArrowLeft,
     Users,
     ShieldCheck,
+    CheckCircle2,
+    XCircle,
 } from "lucide-react";
 
 import API from "@/lib/axios";
+
+import toast from "react-hot-toast";
 
 export default function TeamDetailsPage({
     params,
@@ -23,11 +31,28 @@ export default function TeamDetailsPage({
     const { teamId } =
         use(params);
 
+    const searchParams =
+        useSearchParams();
+
+    const from =
+        searchParams.get("from");
+
+    const groupId =
+        searchParams.get("groupId");
+
     const [team, setTeam] =
         useState(null);
 
     const [loading, setLoading] =
         useState(true);
+
+    const [confirmModal,
+        setConfirmModal] =
+        useState(false);
+
+    const [actionType,
+        setActionType] =
+        useState("");
 
     useEffect(() => {
 
@@ -60,6 +85,61 @@ export default function TeamDetailsPage({
             }
 
         };
+
+    const verifyTeam =
+        async () => {
+
+            try {
+
+                await API.patch(
+                    `/teams/${team._id}/verify`
+                );
+
+                toast.success(
+                    "Team verified"
+                );
+
+                fetchTeam();
+
+            } catch (error) {
+
+                console.log(error);
+
+                toast.error(
+                    "Verification failed"
+                );
+
+            }
+
+        };
+
+    const rejectTeam =
+        async () => {
+
+            try {
+
+                await API.patch(
+                    `/teams/${team._id}/reject`
+                );
+
+                toast.success(
+                    "Team rejected"
+                );
+
+                fetchTeam();
+
+            } catch (error) {
+
+                console.log(error);
+
+                toast.error(
+                    "Rejection failed"
+                );
+
+            }
+
+        };
+
 
     if (loading) {
 
@@ -100,13 +180,19 @@ export default function TeamDetailsPage({
                 <div>
 
                     <Link
-                        href={`/admin/tournaments/${typeof team.tournament ===
-                            "object"
+                        href={
+                            from === "group"
 
-                            ? team.tournament._id
+                                ? `/admin/groups/${groupId}`
 
-                            : team.tournament
-                            }/teams`}
+                                : `/admin/tournaments/${typeof team.tournament ===
+                                    "object"
+
+                                    ? team.tournament._id
+
+                                    : team.tournament
+                                }/teams`
+                        }
                         className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-white"
                     >
 
@@ -126,24 +212,137 @@ export default function TeamDetailsPage({
 
                 </div>
 
-                <div
-                    className={`inline-flex rounded-2xl px-5 py-3 text-sm font-bold
+                <div className="flex flex-wrap items-center gap-4">
 
-               ${team.status ===
-                            "verified"
+                    <div
+                        className={`inline-flex rounded-2xl px-5 py-3 text-sm font-bold
 
-                            ? "bg-green-500/20 text-green-400"
+      ${team.status ===
+                                "verified"
 
-                            : team.status ===
-                                "rejected"
+                                ? "bg-green-500/20 text-green-400"
 
-                                ? "bg-red-500/20 text-red-400"
+                                : team.status ===
+                                    "rejected"
 
-                                : "bg-yellow-500/20 text-yellow-400"
-                        }`}
-                >
+                                    ? "bg-red-500/20 text-red-400"
 
-                    {team.status}
+                                    : "bg-yellow-500/20 text-yellow-400"
+                            }`}
+                    >
+
+                        {team.status}
+
+                    </div>
+
+                    {
+                        team.status ===
+                        "pending" && (
+
+                            <>
+
+                                <button
+                                    onClick={() => {
+
+                                        setActionType(
+                                            "verify"
+                                        );
+
+                                        setConfirmModal(
+                                            true
+                                        );
+
+                                    }}
+                                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3 font-bold text-white transition hover:scale-105"
+                                >
+
+                                    <CheckCircle2 size={18} />
+
+                                    Verify
+
+                                </button>
+
+                                <button
+                                    onClick={() => {
+
+                                        setActionType(
+                                            "reject"
+                                        );
+
+                                        setConfirmModal(
+                                            true
+                                        );
+
+                                    }}
+                                    className="inline-flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 font-bold text-red-400 transition hover:bg-red-500/20"
+                                >
+
+                                    <XCircle size={18} />
+
+                                    Reject
+
+                                </button>
+
+                            </>
+
+                        )
+                    }
+
+                    {
+                        team.status ===
+                        "rejected" && (
+
+                            <button
+                                onClick={() => {
+
+                                    setActionType(
+                                        "verify"
+                                    );
+
+                                    setConfirmModal(
+                                        true
+                                    );
+
+                                }}
+                                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 px-5 py-3 font-bold text-white transition hover:scale-105"
+                            >
+
+                                <CheckCircle2 size={18} />
+
+                                Re-Verify
+
+                            </button>
+
+                        )
+                    }
+
+                    {
+                        team.status ===
+                        "verified" && (
+
+                            <button
+                                onClick={() => {
+
+                                    setActionType(
+                                        "reject"
+                                    );
+
+                                    setConfirmModal(
+                                        true
+                                    );
+
+                                }}
+                                className="inline-flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-3 font-bold text-red-400 transition hover:bg-red-500/20"
+                            >
+
+                                <XCircle size={18} />
+
+                                Reject Team
+
+                            </button>
+
+                        )
+                    }
 
                 </div>
 
@@ -265,7 +464,7 @@ export default function TeamDetailsPage({
 
                             </p>
 
-                            <pre className="mt-4 text-xs text-white">
+                            {/* <pre className="mt-4 text-xs text-white">
                                 {
                                     JSON.stringify(
                                         team.currentRound,
@@ -273,7 +472,7 @@ export default function TeamDetailsPage({
                                         2
                                     )
                                 }
-                            </pre>
+                            </pre> */}
 
                             <p>
 
@@ -371,6 +570,110 @@ export default function TeamDetailsPage({
                 </div>
 
             </div>
+
+            {
+                confirmModal && (
+
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-5">
+
+                        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#111111] p-8">
+
+                            <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
+                                Confirm Action
+                            </p>
+
+                            <h2 className="mt-4 text-3xl font-black text-white">
+
+                                {
+                                    actionType ===
+                                        "verify"
+
+                                        ? "Verify Team?"
+
+                                        : "Reject Team?"
+                                }
+
+                            </h2>
+
+                            <p className="mt-5 text-gray-400">
+
+                                Are you sure you want to
+                                {" "}
+
+                                {
+                                    actionType
+                                }
+
+                                {" "}
+                                <span className="font-bold text-white">
+                                    {
+                                        team.teamName
+                                    }
+                                </span>
+
+                                ?
+
+                            </p>
+
+                            <div className="mt-10 flex gap-4">
+
+                                <button
+                                    onClick={() =>
+                                        setConfirmModal(
+                                            false
+                                        )
+                                    }
+                                    className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 font-bold text-gray-300 transition hover:bg-white/[0.06]"
+                                >
+
+                                    Cancel
+
+                                </button>
+
+                                <button
+                                    onClick={async () => {
+
+                                        if (
+                                            actionType ===
+                                            "verify"
+                                        ) {
+
+                                            await verifyTeam();
+
+                                        } else {
+
+                                            await rejectTeam();
+
+                                        }
+
+                                        setConfirmModal(
+                                            false
+                                        );
+
+                                    }}
+                                    className={`flex-1 rounded-2xl px-5 py-4 font-bold text-white transition hover:scale-105
+
+                  ${actionType ===
+                                            "verify"
+
+                                            ? "bg-gradient-to-r from-green-500 to-emerald-500"
+
+                                            : "bg-gradient-to-r from-red-500 to-pink-500"
+                                        }`}
+                                >
+
+                                    Confirm
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                )
+            }
 
         </div>
 

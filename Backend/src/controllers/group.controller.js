@@ -269,10 +269,46 @@ const getGroupLeaderboard = asyncHandler(
    }
 );
 
+const getGroupById = asyncHandler(
+      async (req, res) => {
+
+         const { id } =
+            req.params;
+
+         const group =
+            await Group.findById(id)
+
+               .populate("teams")
+
+               .populate("round");
+
+         if (!group) {
+
+            throw new ApiError(
+               404,
+               "Group not found"
+            );
+
+         }
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               group,
+               "Group fetched successfully"
+            )
+
+         );
+
+      }
+   );
+
 
 
 export {
    generateGroups,
    getRoundGroups,
    getGroupLeaderboard,
+   getGroupById,
 };

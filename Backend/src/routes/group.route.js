@@ -4,6 +4,7 @@ import {
    generateGroups,
    getRoundGroups,
    getGroupLeaderboard,
+   getGroupById,
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
@@ -32,6 +33,11 @@ router.get(
    "/:id/leaderboard",
    verifyJWT,
    getGroupLeaderboard
+);
+
+router.get(
+   "/:id",
+   getGroupById
 );
 
 
