@@ -9,10 +9,10 @@ import {
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
-from "../middlewares/auth.middleware.js";
+   from "../middlewares/auth.middleware.js";
 
 import { verifyAdmin }
-from "../middlewares/admin.middleware.js";
+   from "../middlewares/admin.middleware.js";
 
 const router = express.Router();
 
@@ -25,6 +25,8 @@ router.post(
 
 router.patch(
    "/move-teams",
+   verifyJWT,
+   verifyAdmin,
    moveTeamsToGroup
 );
 
@@ -44,6 +46,8 @@ router.get(
 
 router.get(
    "/:id",
+   verifyJWT,
+   verifyAdmin,
    getGroupById
 );
 

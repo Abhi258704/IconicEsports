@@ -65,7 +65,15 @@ const matchSchema = new mongoose.Schema(
 
     map: {
       type: String,
-      enum: ["Erangel", "Miramar", "Rondo"],
+      enum: [
+        "Erangel",
+        "Miramar",
+        "Sanhok",
+        "Livik",
+        "Vikendi",
+        "Rondo",
+      ],
+
       default: "Erangel",
       required: true,
     },
@@ -83,6 +91,10 @@ const matchSchema = new mongoose.Schema(
       required: true,
     },
 
+    startTime: {
+      type: Date,
+    },
+
     status: {
       type: String,
       enum: ["upcoming", "live", "completed"],
@@ -97,13 +109,13 @@ const matchSchema = new mongoose.Schema(
 );
 
 matchSchema.index(
-   {
-      group: 1,
-      matchNumber: 1,
-   },
-   {
-      unique: true,
-   }
+  {
+    group: 1,
+    matchNumber: 1,
+  },
+  {
+    unique: true,
+  }
 );
 
 const Match = mongoose.model("Match", matchSchema);

@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import {
     Users,
     ArrowLeft,
+    Swords,
 } from "lucide-react";
 
 export default function GroupPage() {
@@ -207,107 +208,122 @@ export default function GroupPage() {
 
             {/* HEADER */}
 
-            <div className="flex flex-col gap-6">
+            <div className="rounded-3xl border border-purple-500/40 bg-white/[0.03] p-4">
 
-                <Link
-                    href={`/admin/rounds/${group.round?._id}`}
-                    className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-white"
-                >
+                <div className="flex flex-col gap-6">
 
-                    <ArrowLeft size={18} />
+                    <Link
+                        href={`/admin/rounds/${group.round?._id}`}
+                        className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-cyan-500/30 hover:bg-cyan-500/10 hover:text-white"
+                    >
 
-                    Back
+                        <ArrowLeft size={18} />
 
-                </Link>
+                        Back
 
-                <div>
+                    </Link>
 
-                    <p className="uppercase tracking-[0.3em] text-sm text-cyan-400">
-                        Group Management
-                    </p>
+                    <div>
 
-                    <div className="mt-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+                        <p className="uppercase tracking-[0.3em] text-sm text-cyan-400">
+                            Group Management
+                        </p>
 
-                        <div className="flex flex-col xl:flex-row xl:items-center gap-5">
+                        <div className="mt-3 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
 
-                            <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
+                            <div className="flex flex-col xl:flex-row xl:items-center gap-5">
 
-                                {group.name}
+                                <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
 
-                            </h1>
+                                    {group.name}
 
-                            <div className="flex flex-wrap gap-4">
+                                </h1>
 
-                                <div className="rounded-2xl border border-cyan-500/20 bg-white/[0.03] px-5 py-3">
+                                <div className="flex flex-wrap gap-4">
 
-                                    <p className="text-xs text-gray-400">
+                                    <div className="rounded-2xl border border-cyan-500/20 bg-white/[0.03] px-5 py-3">
 
-                                        Teams
+                                        <p className="text-xs text-gray-400">
 
-                                    </p>
+                                            Teams
 
-                                    <h2 className="text-2xl font-black text-white">
+                                        </p>
 
-                                        {group.teams?.length || 0}
+                                        <h2 className="text-2xl font-black text-white">
 
-                                    </h2>
+                                            {group.teams?.length || 0}
 
-                                </div>
+                                        </h2>
 
-                                <div className="rounded-2xl border border-purple-500/20 bg-white/[0.03] px-5 py-3">
+                                    </div>
 
-                                    <p className="text-xs text-gray-400">
+                                    <div className="rounded-2xl border border-purple-500/20 bg-white/[0.03] px-5 py-3">
 
-                                        Round
+                                        <p className="text-xs text-gray-400">
 
-                                    </p>
+                                            Round
 
-                                    <h2 className="text-xl font-black text-white">
+                                        </p>
 
-                                        {group.round?.name}
+                                        <h2 className="text-xl font-black text-white">
 
-                                    </h2>
+                                            {group.round?.name}
 
-                                </div>
+                                        </h2>
 
-                                <Link
-                                    href={`/admin/groups/${group._id}/slots`}
-                                    className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                                >
+                                    </div>
 
-                                    Manage Slots
+                                    <Link
+                                        href={`/admin/groups/${group._id}/slots`}
+                                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                                    >
 
-                                </Link>
+                                        Slots Allocation
 
-                                <button
-                                    onClick={() => {
+                                    </Link>
 
-                                        if (selectionMode) {
+                                    <Link
+                                        href={`/admin/groups/${group._id}/matches`}
+                                        className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                                    >
 
-                                            setSelectedTeams([]);
+                                        <Swords size={20} />
 
-                                            setTargetGroup("");
+                                        Matches
 
+                                    </Link>
+
+                                    <button
+                                        onClick={() => {
+
+                                            if (selectionMode) {
+
+                                                setSelectedTeams([]);
+
+                                                setTargetGroup("");
+
+                                            }
+
+                                            setSelectionMode(
+                                                !selectionMode
+                                            );
+
+                                        }}
+                                        className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition hover:scale-105 ${selectionMode
+                                            ? "bg-gradient-to-r from-red-500 to-pink-500"
+                                            : "bg-gradient-to-r from-purple-500 to-cyan-500"
+                                            }`}
+                                    >
+
+                                        {
+                                            selectionMode
+                                                ? "Cancel Move"
+                                                : "Move Teams"
                                         }
 
-                                        setSelectionMode(
-                                            !selectionMode
-                                        );
+                                    </button>
 
-                                    }}
-                                    className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition hover:scale-105 ${selectionMode
-                                        ? "bg-gradient-to-r from-red-500 to-pink-500"
-                                        : "bg-gradient-to-r from-purple-500 to-cyan-500"
-                                        }`}
-                                >
-
-                                    {
-                                        selectionMode
-                                            ? "Cancel Move"
-                                            : "Move Teams"
-                                    }
-
-                                </button>
+                                </div>
 
                             </div>
 
@@ -321,11 +337,11 @@ export default function GroupPage() {
 
             {/* SCROLL */}
 
-            <div className="mt-8 flex-1 overflow-y-auto pr-2">
+            <div className="mt-2 flex-1 overflow-y-auto pr-2">
 
                 {/* TEAMS */}
 
-                <div className="mt-12">
+                <div className="mt-2">
 
                     <div>
 
@@ -527,7 +543,7 @@ export default function GroupPage() {
                                 {
                                     selectionMode && (
 
-                                        <div className="sticky bottom-0 mt-10 flex items-center gap-4 rounded-3xl border border-cyan-500/20 bg-[#0a0a0a]/95 p-6 backdrop-blur-xl">
+                                        <div className="sticky bottom-0 mt-10 flex items-center gap-4 rounded-3xl border border-cyan-400/50 bg-[#0a0a0a]/95 p-6 shadow-[0_0_35px_rgba(34,211,238,0.28)] backdrop-blur-xl">
 
                                             <select
                                                 value={targetGroup}
@@ -536,7 +552,7 @@ export default function GroupPage() {
                                                         e.target.value
                                                     )
                                                 }
-                                                className="rounded-2xl border border-cyan-500/20 bg-black/40 px-5 py-4 text-white outline-none"
+                                                className="rounded-2xl border border-cyan-400/40 bg-black/60 px-5 py-4 text-white shadow-[0_0_18px_rgba(34,211,238,0.12)] outline-none transition focus:border-cyan-300 focus:shadow-[0_0_25px_rgba(34,211,238,0.28)]"
                                             >
 
                                                 <option value="">

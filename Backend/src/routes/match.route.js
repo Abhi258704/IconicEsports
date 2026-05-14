@@ -5,6 +5,8 @@ import {
    getGroupMatches,
    updateMatchResults,
    getSingleMatch,
+   updateMatchRoom,
+   updateMatch,
 } from "../controllers/match.controller.js";
 
 import { verifyJWT }
@@ -39,7 +41,22 @@ router.patch(
 router.get(
    "/:id",
    verifyJWT,
+   verifyAdmin,
    getSingleMatch
+);
+
+router.patch(
+   "/:id/room",
+   verifyJWT,
+   verifyAdmin,
+   updateMatchRoom
+);
+
+router.patch(
+   "/:id",
+   verifyJWT,
+   verifyAdmin,
+   updateMatch
 );
 
 export default router;

@@ -103,7 +103,7 @@ export default function GroupSlotsPage() {
 
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
 
-                <div>
+                <div className="flex gap-7 items-center">
 
                     <Link
                         href={`/admin/groups/${group._id}`}
@@ -116,9 +116,9 @@ export default function GroupSlotsPage() {
 
                     </Link>
 
-                    <p className="mt-6 uppercase tracking-[0.3em] text-sm text-cyan-400">
+                    {/* <p className="mt-6 uppercase tracking-[0.3em] text-sm text-cyan-400">
                         Lobby Management
-                    </p>
+                    </p> */}
 
                     <h1 className="mt-3 flex flex-wrap items-center text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
 
@@ -131,6 +131,8 @@ export default function GroupSlotsPage() {
                         </span>
 
                     </h1>
+
+                    <p className="ml-4 text-2xl font-bold text-purple-200">Teams will refer this</p>
 
                 </div>
 
@@ -258,7 +260,7 @@ export default function GroupSlotsPage() {
 
                 {/* STICKY FOOTER */}
 
-                <div className="sticky bottom-0 mt-10 rounded-3xl border border-dashed border-cyan-500/20 bg-[#0a0a0a]/95 backdrop-blur-xl p-8">
+                {/* <div className="sticky bottom-0 mt-10 rounded-3xl border border-dashed border-cyan-500/20 bg-[#0a0a0a]/95 backdrop-blur-xl p-8">
 
                     <div className="flex items-start justify-between gap-6 flex-wrap">
 
@@ -295,7 +297,7 @@ export default function GroupSlotsPage() {
 
                     </div>
 
-                </div>
+                </div> */}
 
             </div>
 
