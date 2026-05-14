@@ -228,18 +228,18 @@ const updateMatchResults = asyncHandler(
          }
 
          // INVALID PLACEMENT CHECK
-         if (
-            result.placement < 1 ||
-            result.placement >
-            match.teams.length
-         ) {
+         // if (
+         //    result.placement < 1 ||
+         //    result.placement >
+         //    match.teams.length
+         // ) {
 
-            throw new ApiError(
-               400,
-               `Placement must be between 1 and ${match.teams.length}`
-            );
+         //    throw new ApiError(
+         //       400,
+         //       `Placement must be between 1 and ${match.teams.length}`
+         //    );
 
-         }
+         // }
 
          result.totalPoints =
             result.placementPoints +
