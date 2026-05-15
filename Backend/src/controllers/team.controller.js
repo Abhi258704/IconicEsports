@@ -129,6 +129,36 @@ const getTournamentTeams = asyncHandler(
    }
 );
 
+const getRoundGroups = asyncHandler(
+      async (req, res) => {
+
+         const { roundId } =
+            req.params;
+
+         const groups =
+            await Group.find({
+               round: roundId,
+            })
+            .select(
+               "_id name teams"
+            )
+            .sort({
+               createdAt: 1,
+            });
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               groups,
+               "Groups fetched successfully"
+            )
+
+         );
+
+      }
+   );
+
 const verifyTeam = asyncHandler(
    async (req, res) => {
 
@@ -175,6 +205,23 @@ const verifyTeam = asyncHandler(
          team.status =
             "verified";
 
+         /* CHECK IF TOURNAMENT ALREADY STARTED */
+
+         const hasTournamentStarted =
+            await Match.exists({
+
+               tournament:
+                  team.tournament,
+
+               status: {
+                  $in: [
+                     "ongoing",
+                     "completed",
+                  ],
+               },
+
+            });
+
          /* FIND ACTIVE ROUND */
 
          const activeRound =
@@ -199,6 +246,38 @@ const verifyTeam = asyncHandler(
             throw new ApiError(
                404,
                "No active round found"
+            );
+
+         }
+
+         /* MANUAL ASSIGNMENT REQUIRED */
+
+         if (hasTournamentStarted) {
+
+            const rounds =
+               await Round.find({
+                  tournament:
+                     team.tournament,
+               })
+                  .select(
+                     "_id name roundNumber"
+                  )
+                  .sort({
+                     roundNumber: 1,
+                  });
+
+            return res.status(200).json(
+
+               new ApiResponse(
+                  200,
+                  {
+                     requiresManualPlacement: true,
+                     team,
+                     rounds,
+                  },
+                  "Tournament already started"
+               )
+
             );
 
          }
@@ -493,6 +572,133 @@ const getTeamById = asyncHandler(
    }
 );
 
+const manualAssignTeam = asyncHandler(
+      async (req, res) => {
+
+         const { teamId } =
+            req.params;
+
+         const {
+            roundId,
+            groupId,
+         } = req.body;
+
+         if (
+            !roundId ||
+            !groupId
+         ) {
+
+            throw new ApiError(
+               400,
+               "Round and group required"
+            );
+
+         }
+
+         const team =
+            await Team.findById(
+               teamId
+            );
+
+         if (!team) {
+
+            throw new ApiError(
+               404,
+               "Team not found"
+            );
+
+         }
+
+         const group =
+            await Group.findById(
+               groupId
+            );
+
+         if (!group) {
+
+            throw new ApiError(
+               404,
+               "Group not found"
+            );
+
+         }
+
+         /* PREVENT DUPLICATES */
+
+         const alreadyExists =
+            group.teams.some(
+               (id) =>
+                  id.toString() ===
+                  team._id.toString()
+            );
+
+         if (alreadyExists) {
+
+            throw new ApiError(
+               400,
+               "Team already exists in group"
+            );
+
+         }
+
+         /* PREVENT ADDING INTO COMPLETED GROUP */
+
+         const completedMatches =
+            await Match.exists({
+
+               group: groupId,
+
+               status: "completed",
+
+            });
+
+         if (
+            completedMatches
+         ) {
+
+            throw new ApiError(
+               400,
+               "Cannot add team to completed group"
+            );
+
+         }
+
+         /* ASSIGN TEAM */
+
+         team.status =
+            "verified";
+
+         team.currentRound =
+            roundId;
+
+         team.group =
+            groupId;
+
+         await team.save();
+
+         /* ADD TO GROUP */
+
+         group.teams.push(
+            team._id
+         );
+
+         await group.save();
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               {
+                  team,
+               },
+               "Team assigned successfully"
+            )
+
+         );
+
+      }
+   );
+
 
 
 
@@ -504,4 +710,6 @@ export {
    verifyTeam,
    rejectTeam,
    getTeamById,
+   getRoundGroups,
+   manualAssignTeam,
 };

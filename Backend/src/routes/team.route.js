@@ -6,6 +6,8 @@ import {
    verifyTeam,
    rejectTeam,
    getTeamById,
+   getRoundGroups,
+   manualAssignTeam,
 } from "../controllers/team.controller.js";
 
 import { verifyJWT }
@@ -36,6 +38,20 @@ router.get(
    verifyJWT,
    verifyAdmin,
    getTeamById
+);
+
+router.get(
+   "/round/:roundId/groups",
+   verifyJWT,
+   verifyAdmin,
+   getRoundGroups
+);
+
+router.post(
+   "/:teamId/manual-assign",
+   verifyJWT,
+   verifyAdmin,
+   manualAssignTeam
 );
 
 router.patch(

@@ -29,6 +29,36 @@ export default function PendingTeamsPage({
    const [teams, setTeams] =
       useState([]);
 
+   const [
+      manualPlacementModal,
+      setManualPlacementModal
+   ] = useState(false);
+
+   const [
+      availableRounds,
+      setAvailableRounds
+   ] = useState([]);
+
+   const [
+      selectedRound,
+      setSelectedRound
+   ] = useState("");
+
+   const [
+      selectedGroup,
+      setSelectedGroup
+   ] = useState("");
+
+   const [
+      availableGroups,
+      setAvailableGroups
+   ] = useState([]);
+
+   const [
+      placementTeam,
+      setPlacementTeam
+   ] = useState(null);
+
    const [filteredTeams,
       setFilteredTeams] =
       useState([]);
@@ -111,14 +141,117 @@ export default function PendingTeamsPage({
 
       };
 
+   const fetchGroups =
+      async (roundId) => {
+
+         try {
+
+            const res =
+               await API.get(
+                  `/teams/round/${roundId}/groups`
+               );
+
+            setAvailableGroups(
+               res.data.data
+            );
+
+         } catch (error) {
+
+            console.log(error);
+
+            toast.error(
+               "Failed to fetch groups"
+            );
+
+         }
+
+      };
+
+   const manualAssignTeam =
+      async () => {
+
+         try {
+
+            await API.post(
+
+               `/teams/${placementTeam._id}/manual-assign`,
+
+               {
+                  roundId:
+                     selectedRound,
+
+                  groupId:
+                     selectedGroup,
+               }
+
+            );
+
+            toast.success(
+               "Team assigned successfully"
+            );
+
+            setManualPlacementModal(
+               false
+            );
+
+            setSelectedRound("");
+
+            setSelectedGroup("");
+
+            setPlacementTeam(
+               null
+            );
+
+            fetchPendingTeams?.();
+
+         } catch (error) {
+
+            console.log(error);
+
+            toast.error(
+
+               error?.response?.data?.message ||
+
+               "Assignment failed"
+
+            );
+
+         }
+
+      };
+
    const verifyTeam =
       async (teamId) => {
 
          try {
 
-            await API.patch(
-               `/teams/${teamId}/verify`
-            );
+            const res =
+               await API.patch(
+                  `/teams/${teamId}/verify`
+               );
+
+            const data =
+               res.data.data;
+
+            if (
+               data.requiresManualPlacement
+            ) {
+
+               setPlacementTeam(
+                  data.team
+               );
+
+               setAvailableRounds(
+                  data.rounds
+               );
+
+               setManualPlacementModal(
+                  true
+               );
+
+               return;
+
+            }
 
             toast.success(
                `${selectedTeam.teamName} verified successfully`
@@ -513,6 +646,213 @@ export default function PendingTeamsPage({
                         >
 
                            Confirm
+
+                        </button>
+
+                     </div>
+
+                  </div>
+
+               </div>
+
+            )
+         }
+
+         {
+            manualPlacementModal && (
+
+               <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm p-5">
+
+                  <div className="w-full max-w-lg rounded-3xl border border-cyan-500/20 bg-[#111111] p-8">
+
+                     <p className="uppercase tracking-[0.25em] text-xs text-cyan-400">
+
+                        Manual Placement
+
+                     </p>
+
+                     <h2 className="mt-4 text-3xl font-black text-white">
+
+                        Tournament Already Started
+
+                     </h2>
+
+                     <p className="mt-4 leading-relaxed text-gray-400">
+
+                        Select which round this team
+                        should join.
+
+                     </p>
+
+                     {
+                        placementTeam && (
+
+                           <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+
+                              <p className="text-sm text-gray-400">
+
+                                 Team
+
+                              </p>
+
+                              <h3 className="mt-2 text-2xl font-black text-white">
+
+                                 {
+                                    placementTeam.teamName
+                                 }
+
+                              </h3>
+
+                           </div>
+
+                        )
+                     }
+
+                     <div className="mt-8">
+
+                        <label className="text-sm text-gray-400">
+
+                           Select Round
+
+                        </label>
+
+                        <select
+                           value={selectedRound}
+                           onChange={async (e) => {
+
+                              const value =
+                                 e.target.value;
+
+                              setSelectedRound(
+                                 value
+                              );
+
+                              setSelectedGroup("");
+
+                              if (value) {
+
+                                 await fetchGroups(
+                                    value
+                                 );
+
+                              }
+
+                           }}
+                           className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none"
+                        >
+
+                           <option value="">
+                              Choose Round
+                           </option>
+
+                           {
+                              availableRounds.map(
+                                 (round) => (
+
+                                    <option
+                                       key={round._id}
+                                       value={round._id}
+                                    >
+
+                                       Round {round.roundNumber}
+                                       {" - "}
+                                       {round.name}
+
+                                    </option>
+
+                                 )
+                              )
+                           }
+
+                        </select>
+
+                     </div>
+
+                     <div className="mt-6">
+
+                        <label className="text-sm text-gray-400">
+
+                           Select Group
+
+                        </label>
+
+                        <select
+                           value={selectedGroup}
+                           onChange={(e) =>
+                              setSelectedGroup(
+                                 e.target.value
+                              )
+                           }
+                           className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none"
+                        >
+
+                           <option value="">
+                              Choose Group
+                           </option>
+
+                           {
+                              availableGroups.map(
+                                 (group) => (
+
+                                    <option
+                                       key={group._id}
+                                       value={group._id}
+                                    >
+
+                                       {group.name}
+                                       {" • "}
+                                       {
+                                          group.teams?.length || 0
+                                       }
+                                       {" teams"}
+
+                                    </option>
+
+                                 )
+                              )
+                           }
+
+                        </select>
+
+                     </div>
+
+                     <div className="mt-10 flex justify-end gap-4">
+
+                        <button
+                           onClick={() => {
+
+                              setManualPlacementModal(
+                                 false
+                              );
+
+                              setSelectedRound("");
+
+                              setSelectedGroup("");
+
+                              setPlacementTeam(
+                                 null
+                              );
+
+                              setAvailableGroups([]);
+
+                           }}
+                           className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 font-bold text-gray-300"
+                        >
+
+                           Cancel
+
+                        </button>
+
+                        <button
+                           disabled={
+                              !selectedRound ||
+                              !selectedGroup
+                           }
+                           onClick={manualAssignTeam}
+                           className="rounded-2xl bg-cyan-500 px-6 py-4 font-bold text-black transition hover:bg-cyan-400 disabled:opacity-50"
+                        >
+
+                           Continue
 
                         </button>
 
