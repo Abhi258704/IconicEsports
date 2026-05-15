@@ -6,6 +6,8 @@ import {
    getGroupLeaderboard,
    getGroupById,
    moveTeamsToGroup,
+   moveTeamsToNextRound,
+   rollbackQualification
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
@@ -30,6 +32,19 @@ router.patch(
    moveTeamsToGroup
 );
 
+router.post(
+   "/:id/move-to-next-round",
+   verifyJWT,
+   verifyAdmin,
+   moveTeamsToNextRound
+);
+
+router.post(
+   "/:id/rollback-qualification",
+   verifyJWT,
+   verifyAdmin,
+   rollbackQualification
+);
 
 router.get(
    "/round/:id",

@@ -177,7 +177,9 @@ export default function GroupMatchesPage() {
                      formData.map,
 
                   scheduledAt:
-                     `${formData.date}T${formData.time}`,
+                     new Date(
+                        `${formData.date}T${formData.time}:00`
+                     ),
 
                }
             );
@@ -282,7 +284,9 @@ export default function GroupMatchesPage() {
                      editData.map,
 
                   scheduledAt:
-                     `${editData.date}T${editData.time}`,
+                     new Date(
+                        `${editData.date}T${editData.time}:00`
+                     ),
 
                }
             );
@@ -498,6 +502,29 @@ export default function GroupMatchesPage() {
                                                 match.scheduledAt
                                              );
 
+                                          const year =
+                                             date.getFullYear();
+
+                                          const month =
+                                             String(
+                                                date.getMonth() + 1
+                                             ).padStart(2, "0");
+
+                                          const day =
+                                             String(
+                                                date.getDate()
+                                             ).padStart(2, "0");
+
+                                          const hours =
+                                             String(
+                                                date.getHours()
+                                             ).padStart(2, "0");
+
+                                          const minutes =
+                                             String(
+                                                date.getMinutes()
+                                             ).padStart(2, "0");
+
                                           setEditData({
 
                                              matchNumber:
@@ -507,14 +534,10 @@ export default function GroupMatchesPage() {
                                                 match.map,
 
                                              date:
-                                                date
-                                                   .toISOString()
-                                                   .split("T")[0],
+                                                `${year}-${month}-${day}`,
 
                                              time:
-                                                date
-                                                   .toISOString()
-                                                   .slice(11, 16),
+                                                `${hours}:${minutes}`,
 
                                           });
 

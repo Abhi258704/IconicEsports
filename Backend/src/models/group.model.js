@@ -22,6 +22,21 @@ const groupSchema = new mongoose.Schema(
       default: 16,
     },
 
+    qualificationLocked: {
+      type: Boolean,
+      default: false,
+    },
+
+    qualifiedTeams: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
+    }],
+
+    movedToRound: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Round",
+    },
+
     teams: [
       {
         type: mongoose.Schema.Types.ObjectId,

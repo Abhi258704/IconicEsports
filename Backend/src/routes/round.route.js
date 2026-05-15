@@ -3,8 +3,9 @@ import express from "express";
 import {
    createRound,
    getTournamentRounds,
-   qualifyTeams,
    getRoundById,
+   getNextRound,
+   updateRound,
 } from "../controllers/round.controller.js";
 
 import { verifyJWT }
@@ -36,11 +37,25 @@ router.get(
    getRoundById
 );
 
-router.post(
-   "/:id/qualify",
+router.patch(
+   "/:id",
    verifyJWT,
    verifyAdmin,
-   qualifyTeams
+   updateRound
 );
+
+router.get(
+   "/next/:id",
+   verifyJWT,
+   verifyAdmin,
+   getNextRound
+);
+
+// router.post(
+//    "/:id/qualify",
+//    verifyJWT,
+//    verifyAdmin,
+//    qualifyTeams
+// );
 
 export default router;

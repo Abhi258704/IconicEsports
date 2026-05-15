@@ -131,13 +131,25 @@ const updateMatchResults = asyncHandler(
 
       const match =
          await Match.findById(id)
-            .populate("teams");
+            .populate("teams")
+            .populate("group");
 
       if (!match) {
 
          throw new ApiError(
             404,
             "Match not found"
+         );
+
+      }
+
+      if (
+         match.group?.qualificationLocked
+      ) {
+
+         throw new ApiError(
+            400,
+            "Cannot edit results after qualification is locked"
          );
 
       }
@@ -354,57 +366,57 @@ const updateMatchRoom = asyncHandler(
 );
 
 const updateMatch = asyncHandler(
-      async (req, res) => {
+   async (req, res) => {
 
-         const { id } =
-            req.params;
+      const { id } =
+         req.params;
 
-         const {
-            matchNumber,
-            map,
-            scheduledAt,
-         } = req.body;
+      const {
+         matchNumber,
+         map,
+         scheduledAt,
+      } = req.body;
 
-         const match =
-            await Match.findById(id);
+      const match =
+         await Match.findById(id);
 
-         if (!match) {
+      if (!match) {
 
-            throw new ApiError(
-               404,
-               "Match not found"
-            );
-
-         }
-
-         match.matchNumber =
-            matchNumber ||
-            match.matchNumber;
-
-         match.map =
-            map || match.map;
-
-         match.scheduledAt =
-            scheduledAt ||
-            match.scheduledAt;
-
-         match.name =
-            `Match ${match.matchNumber}`;
-
-         await match.save();
-
-         return res.status(200).json(
-
-            new ApiResponse(
-               200,
-               match,
-               "Match updated successfully"
-            )
-
+         throw new ApiError(
+            404,
+            "Match not found"
          );
 
       }
-   );
+
+      match.matchNumber =
+         matchNumber ||
+         match.matchNumber;
+
+      match.map =
+         map || match.map;
+
+      match.scheduledAt =
+         scheduledAt ||
+         match.scheduledAt;
+
+      match.name =
+         `Match ${match.matchNumber}`;
+
+      await match.save();
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            match,
+            "Match updated successfully"
+         )
+
+      );
+
+   }
+);
 
 
 

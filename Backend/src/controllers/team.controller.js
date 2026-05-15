@@ -1,5 +1,7 @@
 import Team from "../models/team.model.js";
 
+import Match from "../models/match.model.js";
+
 import Tournament from "../models/tournament.model.js";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -384,6 +386,21 @@ const rejectTeam = asyncHandler(
          throw new ApiError(
             400,
             "Only verified teams can be rejected"
+         );
+
+      }
+
+      const playedMatch =
+         await Match.findOne({
+            teams: team._id,
+            status: "completed",
+         });
+
+      if (playedMatch) {
+
+         throw new ApiError(
+            400,
+            "Cannot reject team after matches are played"
          );
 
       }

@@ -134,130 +134,130 @@ const getTournamentRounds = asyncHandler(
    }
 );
 
-const qualifyTeams = asyncHandler(
-   async (req, res) => {
+// const qualifyTeams = asyncHandler(
+//    async (req, res) => {
 
-      const { id } = req.params;
+//       const { id } = req.params;
 
-      const round =
-         await Round.findById(id);
+//       const round =
+//          await Round.findById(id);
 
-      if (!round) {
+//       if (!round) {
 
-         throw new ApiError(
-            404,
-            "Round not found"
-         );
+//          throw new ApiError(
+//             404,
+//             "Round not found"
+//          );
 
-      }
+//       }
 
-      // PREVENT RE-QUALIFICATION
-      if (round.status === "completed") {
+//       // PREVENT RE-QUALIFICATION
+//       if (round.status === "completed") {
 
-         throw new ApiError(
-            400,
-            "Teams already qualified for this round"
-         );
+//          throw new ApiError(
+//             400,
+//             "Teams already qualified for this round"
+//          );
 
-      }
+//       }
 
-      const groups =
-         await Group.find({
-            round: id,
-         });
+//       const groups =
+//          await Group.find({
+//             round: id,
+//          });
 
-      const qualifiedTeams = [];
+//       const qualifiedTeams = [];
 
-      for (const group of groups) {
+//       for (const group of groups) {
 
-         const leaderboard =
-            await Match.aggregate([
+//          const leaderboard =
+//             await Match.aggregate([
 
-               {
-                  $match: {
-                     group: group._id,
-                     status: "completed",
-                  },
-               },
+//                {
+//                   $match: {
+//                      group: group._id,
+//                      status: "completed",
+//                   },
+//                },
 
-               {
-                  $unwind: "$results",
-               },
+//                {
+//                   $unwind: "$results",
+//                },
 
-               {
-                  $group: {
-                     _id:
-                        "$results.team",
+//                {
+//                   $group: {
+//                      _id:
+//                         "$results.team",
 
-                     totalPoints: {
-                        $sum:
-                           "$results.totalPoints",
-                     },
+//                      totalPoints: {
+//                         $sum:
+//                            "$results.totalPoints",
+//                      },
 
-                     totalPlacementPoints: {
-                        $sum:
-                           "$results.placementPoints",
-                     },
+//                      totalPlacementPoints: {
+//                         $sum:
+//                            "$results.placementPoints",
+//                      },
 
-                     totalKills: {
-                        $sum:
-                           "$results.kills",
-                     },
-                  },
-               },
+//                      totalKills: {
+//                         $sum:
+//                            "$results.kills",
+//                      },
+//                   },
+//                },
 
-               {
-                  $sort: {
-                     totalPoints: -1,
-                     totalPlacementPoints: -1,
-                     totalKills: -1,
-                  },
-               },
+//                {
+//                   $sort: {
+//                      totalPoints: -1,
+//                      totalPlacementPoints: -1,
+//                      totalKills: -1,
+//                   },
+//                },
 
-               {
-                  $limit:
-                     round.qualificationCount,
-               },
-            ]);
+//                {
+//                   $limit:
+//                      round.qualificationCount,
+//                },
+//             ]);
 
-         for (
-            const teamData
-            of leaderboard
-         ) {
+//          for (
+//             const teamData
+//             of leaderboard
+//          ) {
 
-            await Team.findByIdAndUpdate(
-               teamData._id,
-               {
-                  $addToSet: {
-                     qualifiedRounds:
-                        round._id,
-                  },
-               }
-            );
+//             await Team.findByIdAndUpdate(
+//                teamData._id,
+//                {
+//                   $addToSet: {
+//                      qualifiedRounds:
+//                         round._id,
+//                   },
+//                }
+//             );
 
-            qualifiedTeams.push(
-               teamData
-            );
+//             qualifiedTeams.push(
+//                teamData
+//             );
 
-         }
+//          }
 
-      }
+//       }
 
-      // MARK ROUND COMPLETED
-      round.status = "completed";
+//       // MARK ROUND COMPLETED
+//       round.status = "completed";
 
-      await round.save();
+//       await round.save();
 
-      return res.status(200).json(
-         new ApiResponse(
-            200,
-            qualifiedTeams,
-            "Teams qualified successfully"
-         )
-      );
+//       return res.status(200).json(
+//          new ApiResponse(
+//             200,
+//             qualifiedTeams,
+//             "Teams qualified successfully"
+//          )
+//       );
 
-   }
-);
+//    }
+// );
 
 const getRoundById = asyncHandler(
    async (req, res) => {
@@ -297,11 +297,120 @@ const getRoundById = asyncHandler(
    }
 );
 
+const getNextRound = asyncHandler(
+   async (req, res) => {
+
+      const { id } =
+         req.params;
+
+      const currentRound =
+         await Round.findById(id);
+
+      if (!currentRound) {
+
+         throw new ApiError(
+            404,
+            "Round not found"
+         );
+
+      }
+
+      const nextRound =
+         await Round.findOne({
+
+            tournament:
+               currentRound.tournament,
+
+            roundNumber:
+               currentRound.roundNumber + 1,
+
+         });
+
+      if (!nextRound) {
+
+         throw new ApiError(
+            404,
+            "Next round not found"
+         );
+
+      }
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            nextRound,
+            "Next round fetched successfully"
+         )
+
+      );
+
+   }
+);
+
+const updateRound = asyncHandler(
+      async (req, res) => {
+
+         const { id } =
+            req.params;
+
+         const {
+            name,
+            qualificationCount,
+         } = req.body;
+
+         const round =
+            await Round.findById(id)
+               .populate("groups");
+
+         if (!round) {
+
+            throw new ApiError(
+               404,
+               "Round not found"
+            );
+
+         }
+
+         const hasLockedQualification =
+            round.groups?.some(
+               group =>
+                  group.qualificationLocked
+            );
+
+         round.name =
+            name || round.name;
+
+         if (
+            !hasLockedQualification &&
+            qualificationCount
+         ) {
+
+            round.qualificationCount =
+               qualificationCount;
+
+         }
+
+         await round.save();
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               round,
+               "Round updated successfully"
+            )
+
+         );
+
+      }
+   );
 
 
 export {
    createRound,
    getTournamentRounds,
-   qualifyTeams,
    getRoundById,
+   getNextRound,
+   updateRound,
 };

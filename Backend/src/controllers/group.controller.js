@@ -404,10 +404,298 @@ const moveTeamsToGroup = asyncHandler(
 );
 
 
+const moveTeamsToNextRound = asyncHandler(
+   async (req, res) => {
+
+      const {
+         id: currentGroupId
+      } = req.params;
+
+      const {
+         nextRoundId,
+         selectedTeamIds,
+      } = req.body;
+
+      const currentGroup =
+         await Group.findById(
+            currentGroupId
+         ).populate("round");
+
+      if (!currentGroup) {
+
+         throw new ApiError(
+            404,
+            "Current group not found"
+         );
+
+      }
+
+      const nextRound =
+         await Round.findById(
+            nextRoundId
+         );
+
+      if (!nextRound) {
+
+         throw new ApiError(
+            404,
+            "Next round not found"
+         );
+
+      }
+
+      const qualificationLimit =
+         currentGroup?.round
+            ?.qualificationCount || 0;
+
+      if (
+         selectedTeamIds.length !==
+         qualificationLimit
+      ) {
+
+         throw new ApiError(
+            400,
+            `Select exactly ${qualificationLimit} teams`
+         );
+
+      }
+
+      let nextGroups =
+         await Group.find({
+            round:
+               nextRoundId,
+         });
+
+      for (
+         const teamId of selectedTeamIds
+      ) {
+
+         let availableGroup =
+            nextGroups.find(
+               group =>
+                  (
+                     group.teams?.length || 0
+                  ) < 16
+            );
+
+         if (
+            !availableGroup
+         ) {
+
+            const newGroup =
+               await Group.create({
+
+                  tournament:
+                     currentGroup.tournament,
+
+                  round:
+                     nextRoundId,
+
+                  name:
+                     `Group ${String.fromCharCode(
+                        65 +
+                        nextGroups.length
+                     )}`,
+
+                  teams: [],
+
+               });
+
+            nextGroups.push(
+               newGroup
+            );
+
+            nextRound.groups =
+               nextRound.groups || [];
+
+            nextRound.groups.push(
+               newGroup._id
+            );
+
+            await nextRound.save();
+
+            availableGroup =
+               newGroup;
+
+         }
+
+         availableGroup.teams.push(
+            teamId
+         );
+
+         await availableGroup.save();
+
+         await Team.findByIdAndUpdate(
+            teamId,
+            {
+               group:
+                  availableGroup._id,
+
+               currentRound:
+                  nextRoundId,
+            }
+         );
+
+      }
+
+      currentGroup.qualificationLocked =
+         true;
+
+      currentGroup.qualifiedTeams =
+         selectedTeamIds;
+
+      currentGroup.movedToRound =
+         nextRoundId;
+
+      await currentGroup.save();
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            {},
+            "Teams moved successfully"
+         )
+
+      );
+
+   }
+);
+
+const rollbackQualification = asyncHandler(
+   async (req, res) => {
+
+      const {
+         id: currentGroupId
+      } = req.params;
+
+      const currentGroup =
+         await Group.findById(
+            currentGroupId
+         );
+
+      if (!currentGroup) {
+
+         throw new ApiError(
+            404,
+            "Group not found"
+         );
+
+      }
+
+      if (
+         !currentGroup.qualificationLocked
+      ) {
+
+         throw new ApiError(
+            400,
+            "Qualification already unlocked"
+         );
+
+      }
+
+      const nextRoundGroups =
+         await Group.find({
+            round:
+               currentGroup.movedToRound,
+         });
+
+      const nextRoundGroupIds =
+         nextRoundGroups.map(
+            group => group._id
+         );
+
+      const nextRoundMatches =
+         await Match.find({
+            group: {
+               $in:
+                  nextRoundGroupIds
+            }
+         });
+
+      const hasStarted =
+         nextRoundMatches.some(
+            match =>
+               match.roomId ||
+               match.status === "completed"
+         );
+
+      if (hasStarted) {
+
+         throw new ApiError(
+            400,
+            "Cannot rollback. Next round already started."
+         );
+
+      }
+
+      await Group.updateMany(
+         {
+            round:
+               currentGroup.movedToRound,
+         },
+         {
+            $pull: {
+               teams: {
+                  $in:
+                     currentGroup.qualifiedTeams
+               }
+            }
+         }
+      );
+
+      await Group.deleteMany({
+         round:
+            currentGroup.movedToRound,
+         teams: {
+            $size: 0
+         }
+      });
+
+      // await Team.updateMany(
+      //    {
+      //       _id: {
+      //          $in:
+      //             currentGroup.qualifiedTeams
+      //       }
+      //    },
+      //    {
+      //       currentRound:
+      //          currentGroup.round
+      //    }
+      // );
+
+      currentGroup.qualificationLocked =
+         false;
+
+      currentGroup.qualifiedTeams =
+         [];
+
+      currentGroup.movedToRound =
+         null;
+
+      await currentGroup.save();
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            {},
+            "Rollback successful"
+         )
+
+      );
+
+   }
+);
+
+
 export {
    generateGroups,
    getRoundGroups,
    getGroupLeaderboard,
    getGroupById,
    moveTeamsToGroup,
+   moveTeamsToNextRound,
+   rollbackQualification,
 };

@@ -2,10 +2,13 @@
 
 import {
    useEffect,
+   useMemo,
    useState,
 } from "react";
 
 import axios from "@/lib/axios";
+
+import Link from "next/link";
 
 import {
    useParams,
@@ -19,6 +22,7 @@ import {
    ArrowLeft,
    CheckCircle2,
    Loader2,
+   AlertTriangle,
 } from "lucide-react";
 
 export default function MatchResultsPage() {
@@ -49,6 +53,11 @@ export default function MatchResultsPage() {
       setHasChanges] =
       useState(false);
 
+   const [
+      showLeaveModal,
+      setShowLeaveModal
+   ] = useState(false);
+
    const fetchMatch =
       async () => {
 
@@ -63,9 +72,9 @@ export default function MatchResultsPage() {
                data.data
             );
 
-            const initialResults =
-               data.data.teams.map(
-                  (team) => {
+            const sortedResults =
+               [...data.data.teams]
+                  .map((team) => {
 
                      const existing =
                         data.data.results?.find(
@@ -93,11 +102,31 @@ export default function MatchResultsPage() {
 
                      };
 
-                  }
-               );
+                  })
+
+                  .sort((a, b) => {
+
+                     if (
+                        b.totalPoints ===
+                        a.totalPoints
+                     ) {
+
+                        return (
+                           b.placementPoints -
+                           a.placementPoints
+                        );
+
+                     }
+
+                     return (
+                        b.totalPoints -
+                        a.totalPoints
+                     );
+
+                  });
 
             setResults(
-               initialResults
+               sortedResults
             );
 
          } catch (error) {
@@ -178,17 +207,17 @@ export default function MatchResultsPage() {
                }
 
                const updated =
-                  {
+               {
 
-                     ...team,
+                  ...team,
 
-                     [field]:
-                        Math.max(
-                           0,
-                           Number(value)
-                        ),
+                  [field]:
+                     Math.max(
+                        0,
+                        Number(value)
+                     ),
 
-                  };
+               };
 
                updated.totalPoints =
                   updated.kills +
@@ -222,7 +251,7 @@ export default function MatchResultsPage() {
 
             setHasChanges(false);
 
-            fetchMatch();
+            await fetchMatch();
 
          } catch (error) {
 
@@ -255,195 +284,175 @@ export default function MatchResultsPage() {
 
    return (
 
-      <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden bg-[#050505] p-4 text-white">
+      <>
 
-         {/* TOP */}
+         <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden bg-[#050505] p-4 text-white">
 
-         <div>
+            {/* TOP */}
 
-            <button
-               onClick={() => {
+            <div>
 
-                  if (
-                     hasChanges &&
-                     !confirm(
-                        "You have unsaved changes. Leave anyway?"
-                     )
-                  ) {
+               <button
+                  onClick={() => {
 
-                     return;
+                     if (
+                        hasChanges
+                     ) {
 
-                  }
+                        setShowLeaveModal(
+                           true
+                        );
 
-                  router.back();
+                        return;
 
-               }}
-               className="mb-4 inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 font-bold text-white transition hover:bg-white/[0.06]"
-            >
+                     }
 
-               <ArrowLeft size={18} />
+                     router.back();
 
-               Back
+                  }}
+                  className="mb-4 inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 font-bold text-white transition hover:bg-white/[0.06]"
+               >
 
-            </button>
+                  <ArrowLeft size={18} />
 
-            <div className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#111111] to-[#0a0a0a] px-8 py-6 shadow-[0_0_50px_rgba(249,115,22,0.12)]">
+                  Back
 
-               <div className="flex flex-wrap items-center justify-between gap-5">
+               </button>
 
-                  <div>
+               <div className="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-[#111111] to-[#0a0a0a] px-8 py-6 shadow-[0_0_50px_rgba(249,115,22,0.12)]">
 
-                     <p className="uppercase tracking-[0.25em] text-xs text-orange-400">
+                  <div className="flex flex-wrap items-center justify-between gap-5">
 
-                        Match Results
+                     <div>
 
-                     </p>
+                        <p className="uppercase tracking-[0.25em] text-xs text-orange-400">
 
-                     <h1 className="mt-3 text-4xl font-black text-white">
+                           Match Results
 
-                        {match.name}
+                        </p>
 
-                     </h1>
+                        <h1 className="mt-3 text-4xl font-black text-white">
 
-                     <div className="mt-4 flex flex-wrap gap-3">
+                           {match.name}
 
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-bold text-gray-300">
+                        </h1>
 
-                           {match.map}
+                        <div className="mt-4 flex flex-wrap gap-3">
 
-                        </div>
+                           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-bold text-gray-300">
 
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-bold text-gray-300">
+                              {match.map}
 
-                           {
-                              new Date(
-                                 match.scheduledAt
-                              ).toLocaleString(
-                                 "en-GB",
-                                 {
+                           </div>
 
-                                    day: "2-digit",
+                           <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-bold text-gray-300">
 
-                                    month: "short",
+                              {
+                                 new Date(
+                                    match.scheduledAt
+                                 ).toLocaleString(
+                                    "en-GB",
+                                    {
 
-                                    hour: "2-digit",
+                                       day: "2-digit",
 
-                                    minute: "2-digit",
+                                       month: "short",
 
-                                    hour12: false,
+                                       hour: "2-digit",
 
-                                 }
-                              )
-                           }
+                                       minute: "2-digit",
+
+                                       hour12: false,
+
+                                    }
+                                 )
+                              }
+
+                           </div>
 
                         </div>
 
                      </div>
 
+                     {
+                        match.status ===
+                           "completed"
+
+                           ? (
+
+                              <div className="rounded-2xl bg-green-500/20 px-5 py-3 text-sm font-bold text-green-300">
+
+                                 Completed
+
+                              </div>
+
+                           )
+
+                           : (
+
+                              <div className="rounded-2xl bg-orange-500/20 px-5 py-3 text-sm font-bold text-orange-300">
+
+                                 Ongoing
+
+                              </div>
+
+                           )
+                     }
+
                   </div>
-
-                  {
-                     match.status ===
-                        "completed"
-
-                        ? (
-
-                           <div className="rounded-2xl bg-green-500/20 px-5 py-3 text-sm font-bold text-green-300">
-
-                              Completed
-
-                           </div>
-
-                        )
-
-                        : (
-
-                           <div className="rounded-2xl bg-orange-500/20 px-5 py-3 text-sm font-bold text-orange-300">
-
-                              Ongoing
-
-                           </div>
-
-                        )
-                  }
 
                </div>
 
             </div>
 
-         </div>
+            {/* TABLE */}
 
-         {/* TABLE */}
+            <div className="mt-6 flex-1 overflow-y-auto rounded-3xl border border-white/10 bg-[#111111]">
 
-         <div className="mt-6 flex-1 overflow-y-auto rounded-3xl border border-white/10 bg-[#111111]">
+               <table className="w-full">
 
-            <table className="w-full">
+                  <thead className="sticky top-0 z-10 border-b border-white/10 bg-[#0d0d0d] backdrop-blur-xl">
 
-               <thead className="sticky top-0 z-10 border-b border-white/10 bg-[#0d0d0d] backdrop-blur-xl">
+                     <tr>
 
-                  <tr>
+                        <th className="px-6 py-5 text-left text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
 
-                     <th className="px-6 py-5 text-left text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+                           #
 
-                        #
+                        </th>
 
-                     </th>
+                        <th className="px-6 py-5 text-left text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
 
-                     <th className="px-6 py-5 text-left text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+                           Team
 
-                        Team
+                        </th>
 
-                     </th>
+                        <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
 
-                     <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+                           PP
 
-                        PP
+                        </th>
 
-                     </th>
+                        <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
 
-                     <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+                           Kills
 
-                        Kills
+                        </th>
 
-                     </th>
+                        <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
 
-                     <th className="px-6 py-5 text-center text-sm font-bold uppercase tracking-[0.2em] text-orange-400">
+                           Total
 
-                        Total
+                        </th>
 
-                     </th>
+                     </tr>
 
-                  </tr>
+                  </thead>
 
-               </thead>
+                  <tbody>
 
-               <tbody>
-
-                  {
-                     [...results]
-
-                        .sort((a, b) => {
-
-                           if (
-                              b.totalPoints ===
-                              a.totalPoints
-                           ) {
-
-                              return (
-                                 b.placementPoints -
-                                 a.placementPoints
-                              );
-
-                           }
-
-                           return (
-                              b.totalPoints -
-                              a.totalPoints
-                           );
-
-                        })
-
-                        .map(
+                     {
+                        results.map(
                            (
                               team,
                               index
@@ -468,13 +477,15 @@ export default function MatchResultsPage() {
 
                                  <td className="px-6 py-5">
 
-                                    <div className="font-bold text-white">
+                                    <Link
+                                       href={`/admin/teams/${team.team}`}
+                                       target="_blank"
+                                       className="font-bold text-white transition hover:text-orange-400"
+                                    >
 
-                                       {
-                                          team.teamName
-                                       }
+                                       {team.teamName}
 
-                                    </div>
+                                    </Link>
 
                                  </td>
 
@@ -542,92 +553,171 @@ export default function MatchResultsPage() {
 
                            )
                         )
-                  }
+                     }
 
-               </tbody>
+                  </tbody>
 
-            </table>
+               </table>
 
-         </div>
+            </div>
 
-         {/* FOOTER */}
+            {/* FOOTER */}
 
-         <div className="mt-5 rounded-3xl border border-orange-500/20 bg-[#0a0a0a]/95 p-5 backdrop-blur-xl shadow-[0_0_35px_rgba(249,115,22,0.12)]">
+            <div className="mt-5 rounded-3xl border border-orange-500/20 bg-[#0a0a0a]/95 p-5 backdrop-blur-xl shadow-[0_0_35px_rgba(249,115,22,0.12)]">
 
-            <div className="flex flex-wrap items-center justify-between gap-5">
+               <div className="flex flex-wrap items-center justify-between gap-5">
 
-               <div>
+                  <div>
 
-                  <p className="text-sm uppercase tracking-[0.25em] text-orange-400">
+                     <p className="text-sm uppercase tracking-[0.25em] text-orange-400">
 
-                     Match Submission
+                        Match Submission
 
-                  </p>
+                     </p>
 
-                  <h2 className="mt-2 text-2xl font-black text-white">
+                     <h2 className="mt-2 text-2xl font-black text-white">
 
-                     Save Match Results
+                        Save Match Results
 
-                  </h2>
+                     </h2>
 
-                  {
-                     hasChanges && (
+                     {
+                        hasChanges && (
 
-                        <p className="mt-2 text-sm text-yellow-400">
+                           <p className="mt-2 text-sm text-yellow-400">
 
-                           Unsaved changes
+                              Unsaved changes
 
-                        </p>
+                           </p>
 
-                     )
-                  }
+                        )
+                     }
+
+                  </div>
+
+                  <button
+                     onClick={
+                        saveResults
+                     }
+                     disabled={saving}
+                     className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-black text-white transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+
+                     {
+                        saving
+
+                           ? (
+                              <>
+
+                                 <Loader2
+                                    size={20}
+                                    className="animate-spin"
+                                 />
+
+                                 Saving...
+
+                              </>
+                           )
+
+                           : (
+                              <>
+
+                                 <CheckCircle2
+                                    size={20}
+                                 />
+
+                                 Save Results
+
+                              </>
+                           )
+                     }
+
+                  </button>
 
                </div>
-
-               <button
-                  onClick={
-                     saveResults
-                  }
-                  disabled={saving}
-                  className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-black text-white transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60"
-               >
-
-                  {
-                     saving
-
-                        ? (
-                           <>
-
-                              <Loader2
-                                 size={20}
-                                 className="animate-spin"
-                              />
-
-                              Saving...
-
-                           </>
-                        )
-
-                        : (
-                           <>
-
-                              <CheckCircle2
-                                 size={20}
-                              />
-
-                              Save Results
-
-                           </>
-                        )
-                  }
-
-               </button>
 
             </div>
 
          </div>
 
-      </div>
+         {/* LEAVE MODAL */}
+
+         {
+            showLeaveModal && (
+
+               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-5">
+
+                  <div className="w-full max-w-md rounded-3xl border border-yellow-500/20 bg-[#111111] p-8">
+
+                     <div className="flex items-center gap-4">
+
+                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-yellow-500/10 text-yellow-400">
+
+                           <AlertTriangle size={28} />
+
+                        </div>
+
+                        <div>
+
+                           <p className="text-sm uppercase tracking-[0.25em] text-yellow-400">
+
+                              Unsaved Changes
+
+                           </p>
+
+                           <h2 className="mt-2 text-2xl font-black text-white">
+
+                              Leave Page?
+
+                           </h2>
+
+                        </div>
+
+                     </div>
+
+                     <p className="mt-6 leading-relaxed text-gray-400">
+
+                        You have unsaved match results.
+                        Leaving now will discard your changes.
+
+                     </p>
+
+                     <div className="mt-8 flex gap-4">
+
+                        <button
+                           onClick={() =>
+                              setShowLeaveModal(
+                                 false
+                              )
+                           }
+                           className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 font-bold text-gray-300"
+                        >
+
+                           Stay
+
+                        </button>
+
+                        <button
+                           onClick={() =>
+                              router.back()
+                           }
+                           className="flex-1 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 px-5 py-4 font-bold text-white"
+                        >
+
+                           Leave
+
+                        </button>
+
+                     </div>
+
+                  </div>
+
+               </div>
+
+            )
+         }
+
+      </>
 
    );
 

@@ -133,6 +133,7 @@ export default function TeamDetailsPage({
                 console.log(error);
 
                 toast.error(
+                    error?.response?.data?.message ||
                     "Rejection failed"
                 );
 

@@ -92,6 +92,12 @@ export default function RoundDetailsPage({
 
     }
 
+    const hasLockedQualification =
+        round?.groups?.some(
+            group =>
+                group.qualificationLocked
+        );
+
     return (
 
         <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
@@ -227,17 +233,16 @@ export default function RoundDetailsPage({
 
                             {/* EDIT */}
 
-                            {/* <Link
+                            <Link
                                 href={`/admin/rounds/${round._id}/edit`}
                                 className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
                             >
 
                                 <Plus size={20} />
 
-                                Edit Round (baki hh)
+                                Edit Round
 
-                            </Link> */}
-
+                            </Link>
                         </div>
 
                     </div>
