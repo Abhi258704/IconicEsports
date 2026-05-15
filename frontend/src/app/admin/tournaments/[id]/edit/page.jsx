@@ -10,10 +10,14 @@ import {
    useRouter,
 } from "next/navigation";
 
+import Image from "next/image";
+
 import toast from "react-hot-toast";
 
 import {
    Upload,
+   Trophy,
+   ArrowLeft,
 } from "lucide-react";
 
 import API from "@/lib/axios";
@@ -38,16 +42,17 @@ export default function EditTournamentPage({
    const [formData, setFormData] =
       useState({
          name: "",
+         game: "",
          prizePool: "",
          entryFee: "",
          maxTeams: "",
          teamSize: "",
-         teamsPerGroup: 16,
          maps: [],
          rules: "",
          startDate: "",
-         status: "upcoming",
          banner: null,
+         teamsPerGroup: 16,
+         status: "upcoming",
       });
 
    useEffect(() => {
@@ -66,16 +71,23 @@ export default function EditTournamentPage({
                   `/tournaments/${id}`
                );
 
-            const tournament =
+            const responseData =
                res.data.data;
+
+            const tournament =
+               responseData.tournament;
 
             setBannerPreview(
                tournament.banner
             );
 
             setFormData({
+
                name:
                   tournament.name || "",
+
+               game:
+                  tournament.game || "",
 
                prizePool:
                   tournament.prizePool || "",
@@ -90,7 +102,7 @@ export default function EditTournamentPage({
                   tournament.teamSize || "",
 
                teamsPerGroup:
-                  data.teamsPerGroup || 16,
+                  tournament.teamsPerGroup || 16,
 
                maps:
                   tournament.maps || [],
@@ -98,20 +110,25 @@ export default function EditTournamentPage({
                rules:
                   tournament.rules || "",
 
-               status:
-                  tournament.status ||
-                  "upcoming",
-
                startDate:
                   tournament.startDate
                      ?.split("T")[0] || "",
 
+               status:
+                  tournament.status ||
+                  "upcoming",
+
                banner: null,
+
             });
 
          } catch (error) {
 
             console.log(error);
+
+            toast.error(
+               "Failed to load tournament"
+            );
 
          } finally {
 
@@ -121,15 +138,19 @@ export default function EditTournamentPage({
 
       };
 
-   const handleChange = (e) => {
+   const handleChange =
+      (e) => {
 
-      setFormData({
-         ...formData,
-         [e.target.name]:
-            e.target.value,
-      });
+         setFormData({
 
-   };
+            ...formData,
+
+            [e.target.name]:
+               e.target.value,
+
+         });
+
+      };
 
    const handleBannerChange =
       (e) => {
@@ -140,8 +161,11 @@ export default function EditTournamentPage({
          if (!file) return;
 
          setFormData({
+
             ...formData,
+
             banner: file,
+
          });
 
          setBannerPreview(
@@ -154,6 +178,13 @@ export default function EditTournamentPage({
       async (e) => {
 
          e.preventDefault();
+
+         const confirmed =
+            window.confirm(
+               "Are you sure you want to update this tournament?"
+            );
+
+         if (!confirmed) return;
 
          try {
 
@@ -174,7 +205,9 @@ export default function EditTournamentPage({
                         )
                      );
 
-                  } else {
+                  } else if (
+                     formData[key] !== null
+                  ) {
 
                      submitData.append(
                         key,
@@ -209,6 +242,7 @@ export default function EditTournamentPage({
             console.log(error);
 
             toast.error(
+               error?.response?.data?.message ||
                "Update failed"
             );
 
@@ -224,9 +258,9 @@ export default function EditTournamentPage({
 
       return (
 
-         <div className="min-h-[70vh] flex items-center justify-center">
+         <div className="flex min-h-[70vh] items-center justify-center">
 
-            <div className="h-20 w-20 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+            <div className="h-20 w-20 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
 
          </div>
 
@@ -236,284 +270,333 @@ export default function EditTournamentPage({
 
    return (
 
-      <div className="h-[calc(100vh-64px)] overflow-hidden">
+      <div className="grid h-[calc(100vh-64px)] grid-cols-1 gap-8 overflow-hidden xl:grid-cols-2">
 
-         <div className="h-full overflow-y-auto rounded-3xl border border-purple-500/20 bg-white/[0.03] p-8 backdrop-blur-xl">
+         {/* LEFT */}
 
-            <p className="uppercase tracking-[0.3em] text-sm text-purple-400">
-               Tournament Settings
-            </p>
+         <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-gradient-to-br from-[#111] via-black to-[#0a0a0a] p-8">
 
-            <h1 className="mt-4 text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
-               Edit Tournament
-            </h1>
+            <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
 
-            <form
-               onSubmit={handleSubmit}
-               className="mt-10"
-            >
+            <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="relative z-10 flex h-full flex-col">
 
-                  <Input
-                     label="Tournament Name"
-                     name="name"
-                     value={formData.name}
-                     onChange={handleChange}
-                  />
+               <button
+                  type="button"
+                  onClick={() =>
+                     router.back()
+                  }
+                  className="inline-flex w-fit items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-3 text-gray-300 transition hover:border-purple-500/30 hover:bg-purple-500/10 hover:text-white"
+               >
 
-                  <Input
-                     label="Prize Pool"
-                     name="prizePool"
-                     type="number"
-                     value={formData.prizePool}
-                     onChange={handleChange}
-                  />
+                  <ArrowLeft size={18} />
 
-                  <Input
-                     label="Entry Fee"
-                     name="entryFee"
-                     type="number"
-                     value={formData.entryFee}
-                     onChange={handleChange}
-                  />
+                  Back
 
-                  <Input
-                     label="Max Teams"
-                     name="maxTeams"
-                     type="number"
-                     value={formData.maxTeams}
-                     onChange={handleChange}
-                  />
+               </button>
 
-                  <Input
-                     label="Team Size"
-                     name="teamSize"
-                     type="number"
-                     value={formData.teamSize}
-                     onChange={handleChange}
-                  />
+               <p className="mt-8 text-sm uppercase tracking-[0.3em] text-purple-400">
 
-                  {/* <Input
-                     label="Teams Per Group"
-                     name="teamsPerGroup"
-                     type="number"
-                     value={formData.teamsPerGroup}
-                     onChange={handleChange}
-                  /> */}
+                  Edit Tournament
 
-                  <div>
+               </p>
 
-                     <label className="text-sm text-gray-400">
-                        Status
-                     </label>
+               <h1 className="mt-4 bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-5xl font-black text-transparent">
 
-                     <select
-                        name="status"
-                        value={formData.status}
-                        onChange={handleChange}
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
-                     >
+                  Update Esports Event
 
-                        <option value="upcoming">
-                           Upcoming
-                        </option>
+               </h1>
 
-                        <option value="ongoing">
-                           Ongoing
-                        </option>
+               <div className="mt-10 flex-1 overflow-hidden rounded-3xl border border-white/10 bg-black/30">
 
-                        <option value="completed">
-                           Completed
-                        </option>
+                  {
+                     bannerPreview ? (
 
-                        <option value="cancelled">
-                           Cancelled
-                        </option>
+                        <div className="relative h-full min-h-[600px] w-full">
 
-                     </select>
-
-                  </div>
-
-               </div>
-
-               {/* MAPS */}
-
-               <div className="mt-8">
-
-                  <label className="text-sm text-gray-400">
-                     Maps
-                  </label>
-
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-
-                     {[
-                        "Erangel",
-                        "Miramar",
-                        "Sanhok",
-                        "Vikendi",
-                        "Rondo",
-                        "Karakin",
-                     ].map((map) => (
-
-                        <label
-                           key={map}
-                           className={`flex cursor-pointer items-center justify-center rounded-2xl border px-4 py-4 font-semibold transition
-
-                           ${formData.maps.includes(map)
-                                 ? "border-purple-500 bg-purple-500/20 text-purple-300"
-                                 : "border-white/10 bg-black/20 text-gray-400 hover:border-purple-500/40"
-                              }`}
-                        >
-
-                           <input
-                              type="checkbox"
-                              hidden
-                              checked={formData.maps.includes(map)}
-                              onChange={() => {
-
-                                 if (
-                                    formData.maps.includes(map)
-                                 ) {
-
-                                    setFormData({
-                                       ...formData,
-
-                                       maps:
-                                          formData.maps.filter(
-                                             (item) =>
-                                                item !== map
-                                          ),
-                                    });
-
-                                 } else {
-
-                                    setFormData({
-                                       ...formData,
-
-                                       maps: [
-                                          ...formData.maps,
-                                          map,
-                                       ],
-                                    });
-
-                                 }
-
-                              }}
+                           <Image
+                              src={bannerPreview}
+                              alt="Banner Preview"
+                              fill
+                              className="object-cover"
                            />
 
-                           {map}
+                           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent" />
 
-                        </label>
+                           <div className="absolute bottom-0 left-0 right-0 p-8">
 
-                     ))}
+                              <p className="text-sm uppercase tracking-[0.3em] text-cyan-400">
 
-                  </div>
+                                 Tournament Preview
+
+                              </p>
+
+                              <h2 className="mt-3 text-5xl font-black text-white">
+
+                                 {
+                                    formData.name ||
+                                    "Tournament Name"
+                                 }
+
+                              </h2>
+
+                              <div className="mt-5 flex flex-wrap gap-3">
+
+                                 <div className="rounded-2xl bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur-xl">
+
+                                    Prize Pool:
+                                    {" "}
+                                    ₹
+                                    {
+                                       formData.prizePool || 0
+                                    }
+
+                                 </div>
+
+                                 <div className="rounded-2xl bg-purple-500/20 px-5 py-3 text-sm font-bold text-purple-300 backdrop-blur-xl">
+
+                                    {
+                                       formData.game || "BGMI"
+                                    }
+
+                                 </div>
+
+                                 <div className="rounded-2xl bg-cyan-500/20 px-5 py-3 text-sm font-bold capitalize text-cyan-300 backdrop-blur-xl">
+
+                                    {
+                                       formData.status
+                                    }
+
+                                 </div>
+
+                              </div>
+
+                           </div>
+
+                        </div>
+
+                     ) : (
+
+                        <div className="flex h-full min-h-[600px] flex-col items-center justify-center px-10 text-center">
+
+                           <Trophy
+                              size={80}
+                              className="text-purple-400"
+                           />
+
+                           <p className="mt-6 leading-relaxed text-gray-400">
+
+                              Upload a tournament banner
+                              to preview your esports event.
+
+                           </p>
+
+                        </div>
+
+                     )
+                  }
 
                </div>
 
-               {/* RULES */}
+            </div>
 
-               <div className="mt-8">
+         </div>
+
+         {/* RIGHT */}
+
+         <form
+            onSubmit={handleSubmit}
+            className="h-full overflow-y-auto rounded-3xl border border-purple-500/20 bg-white/[0.03] p-8 backdrop-blur-xl"
+         >
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+
+               <Input
+                  label="Tournament Name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+               />
+
+               <div>
 
                   <label className="text-sm text-gray-400">
-                     Rules
+
+                     Game
+
                   </label>
 
-                  <textarea
-                     name="rules"
-                     rows={5}
-                     value={formData.rules}
+                  <select
+                     name="game"
+                     value={formData.game}
                      onChange={handleChange}
                      className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
-                  />
+                  >
+
+                     <option
+                        value=""
+                        className="bg-black"
+                     >
+                        Select Game
+                     </option>
+
+                     <option
+                        value="BGMI"
+                        className="bg-black"
+                     >
+                        BGMI
+                     </option>
+
+                  </select>
 
                </div>
 
-               {/* DATE */}
+               <Input
+                  label="Prize Pool"
+                  name="prizePool"
+                  type="number"
+                  value={formData.prizePool}
+                  onChange={handleChange}
+               />
 
-               <div className="mt-8">
+               <Input
+                  label="Entry Fee"
+                  name="entryFee"
+                  type="number"
+                  value={formData.entryFee}
+                  onChange={handleChange}
+               />
 
-                  <Input
-                     label="Start Date"
-                     name="startDate"
-                     type="date"
-                     value={formData.startDate}
-                     onChange={handleChange}
-                  />
+               <Input
+                  label="Max Teams"
+                  name="maxTeams"
+                  type="number"
+                  value={formData.maxTeams}
+                  onChange={handleChange}
+               />
 
-               </div>
+               <Input
+                  label="Team Size"
+                  name="teamSize"
+                  type="number"
+                  value={formData.teamSize}
+                  onChange={handleChange}
+               />
 
-               {/* BANNER */}
+               <Input
+                  label="Teams Per Group"
+                  name="teamsPerGroup"
+                  type="number"
+                  value={formData.teamsPerGroup}
+                  onChange={handleChange}
+               />
 
-               <div className="mt-8">
+               <Input
+                  label="Start Date"
+                  name="startDate"
+                  type="date"
+                  value={formData.startDate}
+                  onChange={handleChange}
+               />
+
+               <div className="md:col-span-2">
 
                   <label className="text-sm text-gray-400">
-                     Tournament Banner
+
+                     Status
+
                   </label>
 
-                  <label className="mt-2 flex cursor-pointer items-center justify-center gap-3 rounded-2xl border border-dashed border-purple-500/30 bg-black/20 px-6 py-8 transition hover:border-purple-500">
+                  <select
+                     name="status"
+                     value={formData.status}
+                     onChange={handleChange}
+                     className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
+                  >
+
+                     <option value="upcoming">
+                        Upcoming
+                     </option>
+
+                     <option value="ongoing">
+                        Ongoing
+                     </option>
+
+                     <option value="completed">
+                        Completed
+                     </option>
+
+                     <option value="cancelled">
+                        Cancelled
+                     </option>
+
+                  </select>
+
+               </div>
+
+               <div className="md:col-span-2">
+
+                  <label className="text-sm text-gray-400">
+
+                     Tournament Banner
+
+                  </label>
+
+                  <label className="mt-2 flex cursor-pointer items-center justify-center gap-3 rounded-2xl border border-dashed border-purple-500/30 bg-black/30 px-6 py-8 text-gray-300 transition hover:border-purple-500 hover:bg-purple-500/10">
 
                      <Upload size={22} />
 
-                     <span>
+                     <span className="font-medium">
+
                         Upload New Banner
+
                      </span>
 
                      <input
                         type="file"
                         accept="image/*"
-                        hidden
-                        onChange={
-                           handleBannerChange
-                        }
+                        onChange={handleBannerChange}
+                        className="hidden"
                      />
 
                   </label>
 
                </div>
 
-               {/* PREVIEW */}
+            </div>
 
-               {
-                  bannerPreview && (
+            <div className="mt-10 flex items-center justify-end gap-4 border-t border-white/10 pt-6">
 
-                     <img
-                        src={bannerPreview}
-                        alt="Preview"
-                        className="mt-6 h-64 w-full rounded-3xl object-cover"
-                     />
-
-                  )
-               }
-
-               {/* BUTTON */}
+               <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-4 font-semibold text-gray-300 transition hover:bg-white/10 hover:text-white"
+               >
+                  Cancel
+               </button>
 
                <button
                   type="submit"
                   disabled={loading}
-                  className="mt-10 w-full rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-5 text-lg font-black text-white transition hover:scale-[1.01]"
+                  className="rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-8 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                >
-
                   {
                      loading
-                        ? "Updating..."
-                        : "Update Tournament"
+                        ? "Saving..."
+                        : "Save Tournament"
                   }
-
                </button>
 
-            </form>
+            </div>
 
-         </div>
+         </form>
 
       </div>
 
    );
 
 }
-
-/* INPUT */
 
 function Input({
    label,
@@ -525,7 +608,9 @@ function Input({
       <div>
 
          <label className="text-sm text-gray-400">
+
             {label}
+
          </label>
 
          <input
