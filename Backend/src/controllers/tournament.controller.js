@@ -17,9 +17,60 @@ import Round from "../models/round.model.js";
 
 
 const createTournament = asyncHandler(
-    async (req, res) => {
+   async (req, res) => {
 
-        const {
+      const {
+         name,
+         game,
+         prizePool,
+         entryFee,
+         maxTeams,
+         teamSize,
+         teamsPerGroup,
+         maps,
+         rules,
+         startDate,
+      } = req.body;
+
+      const parsedMaps =
+         JSON.parse(maps);
+
+      if (!name || !prizePool) {
+         throw new ApiError(
+            400,
+            "Name and prize pool are required"
+         );
+      }
+
+      const bannerLocalPath =
+         req.file?.path;
+
+      if (!bannerLocalPath) {
+
+         throw new ApiError(
+            400,
+            "Tournament banner is required"
+         );
+
+      }
+
+      const banner =
+         await uploadOnCloudinary(
+            bannerLocalPath
+         );
+
+      if (!banner) {
+
+         throw new ApiError(
+            400,
+            "Banner upload failed"
+         );
+
+      }
+
+
+      const tournament =
+         await Tournament.create({
             name,
             game,
             prizePool,
@@ -27,212 +78,213 @@ const createTournament = asyncHandler(
             maxTeams,
             teamSize,
             teamsPerGroup,
-            maps,
+            maps: parsedMaps,
+            banner: banner.url,
             rules,
             startDate,
-        } = req.body;
+            createdBy: req.user._id,
+         });
 
-        const parsedMaps =
-            JSON.parse(maps);
+      return res.status(201).json(
+         new ApiResponse(
+            201,
+            tournament,
+            "Tournament created successfully"
+         )
+      );
 
-        if (!name || !prizePool) {
-            throw new ApiError(
-                400,
-                "Name and prize pool are required"
-            );
-        }
-
-        const bannerLocalPath =
-            req.file?.path;
-
-        if (!bannerLocalPath) {
-
-            throw new ApiError(
-                400,
-                "Tournament banner is required"
-            );
-
-        }
-
-        const banner =
-            await uploadOnCloudinary(
-                bannerLocalPath
-            );
-
-        if (!banner) {
-
-            throw new ApiError(
-                400,
-                "Banner upload failed"
-            );
-
-        }
-
-
-        const tournament =
-            await Tournament.create({
-                name,
-                game,
-                prizePool,
-                entryFee,
-                maxTeams,
-                teamSize,
-                teamsPerGroup,
-                maps: parsedMaps,
-                banner: banner.url,
-                rules,
-                startDate,
-                createdBy: req.user._id,
-            });
-
-        return res.status(201).json(
-            new ApiResponse(
-                201,
-                tournament,
-                "Tournament created successfully"
-            )
-        );
-
-    }
+   }
 );
 
 const getAllTournaments = asyncHandler(
-    async (req, res) => {
+   async (req, res) => {
 
-        const tournaments =
-            await Tournament.find({
-                isDeleted: false,
-            })
-                .populate(
-                    "createdBy",
-                    "name email avatar"
-                )
-                .sort({ createdAt: -1 });
+      const tournaments =
+         await Tournament.aggregate([
 
-        return res.status(200).json(
-            new ApiResponse(
-                200,
-                tournaments,
-                "Tournaments fetched successfully"
-            )
-        );
+            {
+               $match: {
+                  isDeleted: false,
+               },
+            },
 
-    }
+            {
+               $lookup: {
+                  from: "teams",
+                  localField: "_id",
+                  foreignField: "tournament",
+                  as: "teams",
+               },
+            },
+
+            {
+               $lookup: {
+                  from: "users",
+                  localField: "createdBy",
+                  foreignField: "_id",
+                  as: "createdBy",
+               },
+            },
+
+            {
+               $unwind: {
+                  path: "$createdBy",
+                  preserveNullAndEmptyArrays: true,
+               },
+            },
+
+            {
+               $addFields: {
+                  totalTeams: {
+                     $size: "$teams",
+                  },
+               },
+            },
+
+            {
+               $project: {
+
+                  teams: 0,
+
+                  "createdBy.password": 0,
+
+                  "createdBy.refreshToken": 0,
+
+               },
+            },
+
+            {
+               $sort: {
+                  createdAt: -1,
+               },
+            },
+
+         ]);
+
+      return res.status(200).json(
+         new ApiResponse(
+            200,
+            tournaments,
+            "Tournaments fetched successfully"
+         )
+      );
+
+   }
 );
 
 const getTournamentById = asyncHandler(
-      async (req, res) => {
+   async (req, res) => {
 
-         const { id } =
-            req.params;
+      const { id } =
+         req.params;
 
-         const tournament =
-            await Tournament.findById(id);
+      const tournament =
+         await Tournament.findById(id);
 
-         if (!tournament) {
+      if (!tournament) {
 
-            throw new ApiError(
-               404,
-               "Tournament not found"
-            );
-
-         }
-
-         /* STATS */
-
-         const totalTeams =
-            await Team.countDocuments({
-
-               tournament: id,
-
-               isDeleted: false,
-
-            });
-
-         const verifiedTeams =
-            await Team.countDocuments({
-
-               tournament: id,
-
-               status: "verified",
-
-               isDeleted: false,
-
-            });
-
-         const pendingTeams =
-            await Team.countDocuments({
-
-               tournament: id,
-
-               status: "pending",
-
-               isDeleted: false,
-
-            });
-
-         const totalRounds =
-            await Round.countDocuments({
-               tournament: id,
-            });
-
-         return res.status(200).json(
-
-            new ApiResponse(
-               200,
-               {
-
-                  tournament,
-
-                  stats: {
-
-                     totalTeams,
-
-                     verifiedTeams,
-
-                     pendingTeams,
-
-                     totalRounds,
-
-                  },
-
-               },
-               "Tournament fetched successfully"
-            )
-
+         throw new ApiError(
+            404,
+            "Tournament not found"
          );
 
       }
-   );
+
+      /* STATS */
+
+      const totalTeams =
+         await Team.countDocuments({
+
+            tournament: id,
+
+            isDeleted: false,
+
+         });
+
+      const verifiedTeams =
+         await Team.countDocuments({
+
+            tournament: id,
+
+            status: "verified",
+
+            isDeleted: false,
+
+         });
+
+      const pendingTeams =
+         await Team.countDocuments({
+
+            tournament: id,
+
+            status: "pending",
+
+            isDeleted: false,
+
+         });
+
+      const totalRounds =
+         await Round.countDocuments({
+            tournament: id,
+         });
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            {
+
+               tournament,
+
+               stats: {
+
+                  totalTeams,
+
+                  verifiedTeams,
+
+                  pendingTeams,
+
+                  totalRounds,
+
+               },
+
+            },
+            "Tournament fetched successfully"
+         )
+
+      );
+
+   }
+);
 
 const deleteTournament = asyncHandler(
-    async (req, res) => {
+   async (req, res) => {
 
-        const { id } = req.params;
+      const { id } = req.params;
 
-        const tournament =
-            await Tournament.findById(id);
+      const tournament =
+         await Tournament.findById(id);
 
-        if (!tournament) {
-            throw new ApiError(
-                404,
-                "Tournament not found"
-            );
-        }
+      if (!tournament) {
+         throw new ApiError(
+            404,
+            "Tournament not found"
+         );
+      }
 
-        tournament.isDeleted = true;
+      tournament.isDeleted = true;
 
-        await tournament.save();
+      await tournament.save();
 
-        return res.status(200).json(
-            new ApiResponse(
-                200,
-                {},
-                "Tournament deleted successfully"
-            )
-        );
+      return res.status(200).json(
+         new ApiResponse(
+            200,
+            {},
+            "Tournament deleted successfully"
+         )
+      );
 
-    }
+   }
 );
 
 const updateTournament = asyncHandler(
@@ -333,17 +385,17 @@ const updateTournament = asyncHandler(
 );
 
 const getTournamentTeamsData = asyncHandler(
-      async (req, res) => {
+   async (req, res) => {
 
-         const { id } =
-            req.params;
+      const { id } =
+         req.params;
 
-         /* GROUPS */
+      /* GROUPS */
 
-         const groups =
-            await Group.find({
-               tournament: id,
-            })
+      const groups =
+         await Group.find({
+            tournament: id,
+         })
 
             .populate("teams")
 
@@ -351,36 +403,36 @@ const getTournamentTeamsData = asyncHandler(
                createdAt: 1,
             });
 
-         /* PENDING */
+      /* PENDING */
 
-         const pendingTeams =
-            await Team.find({
+      const pendingTeams =
+         await Team.find({
 
-               tournament: id,
+            tournament: id,
 
-               status: "pending",
+            status: "pending",
 
-               isDeleted: false,
+            isDeleted: false,
 
-            }).sort({
-               createdAt: -1,
-            });
+         }).sort({
+            createdAt: -1,
+         });
 
-         return res.status(200).json(
+      return res.status(200).json(
 
-            new ApiResponse(
-               200,
-               {
-                  groups,
-                  pendingTeams,
-               },
-               "Tournament team data fetched successfully"
-            )
+         new ApiResponse(
+            200,
+            {
+               groups,
+               pendingTeams,
+            },
+            "Tournament team data fetched successfully"
+         )
 
-         );
+      );
 
-      }
-   );
+   }
+);
 
 
 
@@ -388,10 +440,10 @@ const getTournamentTeamsData = asyncHandler(
 
 
 export {
-    createTournament,
-    getAllTournaments,
-    getTournamentById,
-    deleteTournament,
-    updateTournament,
-    getTournamentTeamsData,
+   createTournament,
+   getAllTournaments,
+   getTournamentById,
+   deleteTournament,
+   updateTournament,
+   getTournamentTeamsData,
 };

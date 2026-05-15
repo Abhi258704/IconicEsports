@@ -355,19 +355,17 @@ export default function TournamentDetailsPage({
                     <div
                         className={`mt-3 inline-flex rounded-2xl px-5 py-3 text-sm font-bold
 
-                        ${
-                            tournament.status ===
-                            "ongoing"
+                        ${tournament.status === "registration-open"
+                                ? "bg-emerald-500/20 text-emerald-400"
 
-                                ? "bg-green-500/20 text-green-400"
+                                : tournament.status === "ongoing"
+                                    ? "bg-cyan-500/20 text-cyan-400"
 
-                                : tournament.status ===
-                                  "completed"
+                                    : tournament.status === "completed"
+                                        ? "bg-red-500/20 text-red-400"
 
-                                ? "bg-red-500/20 text-red-400"
-
-                                : "bg-yellow-500/20 text-yellow-400"
-                        }`}
+                                        : "bg-yellow-500/20 text-yellow-400"
+                            }`}
                     >
 
                         {tournament.status}

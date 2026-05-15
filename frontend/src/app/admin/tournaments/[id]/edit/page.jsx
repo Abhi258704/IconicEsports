@@ -519,6 +519,10 @@ export default function EditTournamentPage({
                         Upcoming
                      </option>
 
+                     <option value="registration-open">
+                        registration-open
+                     </option>
+
                      <option value="ongoing">
                         Ongoing
                      </option>

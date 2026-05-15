@@ -185,7 +185,7 @@ export default function TournamentsPage() {
 
                                 {/* BANNER */}
 
-                                <div className="relative h-52 overflow-hidden">
+                                <div className="relative h-72 overflow-hidden">
 
                                     <Image
                                         src={tournament.banner}
@@ -204,7 +204,7 @@ export default function TournamentsPage() {
 
                                 {/* CONTENT */}
 
-                                <div className="p-6">
+                                <div className="p-5">
 
                                     <div className="flex items-start justify-between gap-4">
 
@@ -221,19 +221,18 @@ export default function TournamentsPage() {
                                             <div
                                                 className={`mt-4 inline-flex rounded-2xl px-4 py-2 text-sm font-bold
 
-                                                         ${tournament.status ===
-                                                        "ongoing"
+                                                         ${tournament.status === "registration-open"
+                                                        ? "bg-emerald-500/20 text-emerald-400"
 
-                                                        ? "bg-green-500/20 text-green-400"
+                                                        : tournament.status === "ongoing"
+                                                            ? "bg-cyan-500/20 text-cyan-400"
 
-                                                        : tournament.status ===
-                                                            "completed"
+                                                            : tournament.status === "completed"
+                                                                ? "bg-red-500/20 text-red-400"
 
-                                                            ? "bg-red-500/20 text-red-400"
-
-                                                            : "bg-yellow-500/20 text-yellow-400"
+                                                                : "bg-yellow-500/20 text-yellow-400"
                                                     }`}
-                                                      >
+                                            >
 
                                                 {tournament.status}
 
@@ -241,26 +240,32 @@ export default function TournamentsPage() {
 
                                         </div>
 
-                                        <button
-                                            onClick={(e) => {
+                                        {
+                                            tournament.totalTeams === 0 && (
 
-                                                e.preventDefault();
+                                                <button
+                                                    onClick={(e) => {
 
-                                                e.stopPropagation();
+                                                        e.preventDefault();
 
-                                                setSelectedTournament(
-                                                    tournament
-                                                );
+                                                        e.stopPropagation();
 
-                                                setDeleteModal(true);
+                                                        setSelectedTournament(
+                                                            tournament
+                                                        );
 
-                                            }}
-                                            className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-red-400 transition hover:bg-red-500/20"
-                                        >
+                                                        setDeleteModal(true);
 
-                                            <Trash2 size={18} />
+                                                    }}
+                                                    className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-red-400 transition hover:bg-red-500/20"
+                                                >
 
-                                        </button>
+                                                    <Trash2 size={20} />
+
+                                                </button>
+
+                                            )
+                                        }
 
                                     </div>
 
