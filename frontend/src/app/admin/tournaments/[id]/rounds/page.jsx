@@ -15,10 +15,25 @@ import {
    Plus,
    Trophy,
    Layers3,
-   CheckCircle2,
 } from "lucide-react";
 
 import API from "@/lib/axios";
+
+const ROUND_OPTIONS = [
+
+   "Round 1",
+   "Round 2",
+   "Round 3",
+   "Round 4",
+   "Round 5",
+   "Round 6",
+   "Round 7",
+   "Quarter Finals",
+   "Semi Finals",
+   "Final",
+   "Grand Final",
+
+];
 
 export default function TournamentRoundsPage({
    params,
@@ -40,9 +55,11 @@ export default function TournamentRoundsPage({
 
    const [formData, setFormData] =
       useState({
-         name: "",
-         roundNumber: "",
+
+         name: "Round 1",
+
          qualificationCount: 4,
+
       });
 
    useEffect(() => {
@@ -80,9 +97,12 @@ export default function TournamentRoundsPage({
    const handleChange = (e) => {
 
       setFormData({
+
          ...formData,
+
          [e.target.name]:
             e.target.value,
+
       });
 
    };
@@ -99,16 +119,17 @@ export default function TournamentRoundsPage({
             await API.post(
                "/rounds",
                {
+
                   tournamentId: id,
 
                   name:
                      formData.name,
 
-                  roundNumber:
-                     formData.roundNumber,
-
                   qualificationCount:
-                     formData.qualificationCount,
+                     Number(
+                        formData.qualificationCount
+                     ),
+
                }
             );
 
@@ -119,9 +140,11 @@ export default function TournamentRoundsPage({
             setCreateModal(false);
 
             setFormData({
-               name: "",
-               roundNumber: "",
+
+               name: "Round 1",
+
                qualificationCount: 4,
+
             });
 
             fetchRounds();
@@ -131,8 +154,11 @@ export default function TournamentRoundsPage({
             console.log(error);
 
             toast.error(
+
                error?.response?.data?.message ||
+
                "Failed to create round"
+
             );
 
          } finally {
@@ -143,41 +169,13 @@ export default function TournamentRoundsPage({
 
       };
 
-   const qualifyRound =
-      async (roundId) => {
-
-         try {
-
-            await API.post(
-               `/rounds/${roundId}/qualify`
-            );
-
-            toast.success(
-               "Teams qualified successfully"
-            );
-
-            fetchRounds();
-
-         } catch (error) {
-
-            console.log(error);
-
-            toast.error(
-               error?.response?.data?.message ||
-               "Qualification failed"
-            );
-
-         }
-
-      };
-
    if (loading) {
 
       return (
 
-         <div className="min-h-[70vh] flex items-center justify-center">
+         <div className="flex min-h-[70vh] items-center justify-center">
 
-            <div className="h-20 w-20 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
+            <div className="h-20 w-20 animate-spin rounded-full border-4 border-purple-500 border-t-transparent" />
 
          </div>
 
@@ -191,7 +189,7 @@ export default function TournamentRoundsPage({
 
          {/* HEADER */}
 
-         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
 
             <div>
 
@@ -206,12 +204,16 @@ export default function TournamentRoundsPage({
 
                </Link>
 
-               <p className="mt-6 uppercase tracking-[0.3em] text-sm text-purple-400">
+               <p className="mt-6 text-sm uppercase tracking-[0.3em] text-purple-400">
+
                   Tournament Flow
+
                </p>
 
-               <h1 className="mt-3 text-5xl font-black bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
+               <h1 className="mt-3 bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-5xl font-black text-transparent">
+
                   Tournament Rounds
+
                </h1>
 
             </div>
@@ -231,7 +233,7 @@ export default function TournamentRoundsPage({
 
          </div>
 
-         {/* SCROLL */}
+         {/* CONTENT */}
 
          <div className="mt-10 flex-1 overflow-y-auto pr-2">
 
@@ -246,18 +248,22 @@ export default function TournamentRoundsPage({
                      />
 
                      <h2 className="mt-6 text-3xl font-black text-white">
+
                         No Rounds Yet
+
                      </h2>
 
                      <p className="mt-3 text-gray-400">
+
                         Create your first tournament round.
+
                      </p>
 
                   </div>
 
                ) : (
 
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                  <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
 
                      {
                         rounds.map(
@@ -272,12 +278,16 @@ export default function TournamentRoundsPage({
 
                                     <div>
 
-                                       <p className="uppercase tracking-[0.25em] text-xs text-purple-400">
+                                       <p className="text-xs uppercase tracking-[0.25em] text-purple-400">
+
                                           Round {round.roundNumber}
+
                                        </p>
 
                                        <h2 className="mt-3 text-4xl font-black text-white">
+
                                           {round.name}
+
                                        </h2>
 
                                     </div>
@@ -313,11 +323,17 @@ export default function TournamentRoundsPage({
                                     <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
 
                                        <p className="text-sm text-gray-400">
+
                                           Qualification Count
+
                                        </p>
 
                                        <h2 className="mt-3 text-3xl font-black text-white">
-                                          {round.qualificationCount}
+
+                                          {
+                                             round.qualificationCount
+                                          }
+
                                        </h2>
 
                                     </div>
@@ -325,11 +341,17 @@ export default function TournamentRoundsPage({
                                     <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
 
                                        <p className="text-sm text-gray-400">
+
                                           Groups
+
                                        </p>
 
                                        <h2 className="mt-3 text-3xl font-black text-white">
-                                          {round.groups.length}
+
+                                          {
+                                             round.groups.length
+                                          }
+
                                        </h2>
 
                                     </div>
@@ -344,30 +366,10 @@ export default function TournamentRoundsPage({
                                        href={`/admin/rounds/${round._id}`}
                                        className="rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
                                     >
+
                                        Manage Round
+
                                     </Link>
-
-                                    {/* {
-                                       round.status !==
-                                       "completed" && (
-
-                                          <button
-                                             onClick={() =>
-                                                qualifyRound(
-                                                   round._id
-                                                )
-                                             }
-                                             className="flex items-center gap-2 rounded-2xl border border-green-500/20 bg-green-500/10 px-6 py-4 font-bold text-green-400 transition hover:bg-green-500/20"
-                                          >
-
-                                             <CheckCircle2 size={18} />
-
-                                             Qualify Teams
-
-                                          </button>
-
-                                       )
-                                    } */}
 
                                  </div>
 
@@ -389,12 +391,20 @@ export default function TournamentRoundsPage({
          {
             createModal && (
 
-               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-5 backdrop-blur-sm">
 
                   <div className="w-full max-w-xl rounded-3xl border border-purple-500/20 bg-[#0f0f0f] p-8">
 
-                     <h2 className="text-4xl font-black text-white">
+                     <p className="text-sm uppercase tracking-[0.25em] text-purple-400">
+
+                        Tournament Setup
+
+                     </p>
+
+                     <h2 className="mt-3 text-4xl font-black text-white">
+
                         Create Round
+
                      </h2>
 
                      <form
@@ -402,28 +412,91 @@ export default function TournamentRoundsPage({
                         className="mt-8 space-y-6"
                      >
 
-                        <Input
-                           label="Round Name"
-                           name="name"
-                           value={formData.name}
-                           onChange={handleChange}
-                        />
+                        {/* ROUND NAME */}
 
-                        <Input
-                           label="Round Number"
-                           name="roundNumber"
-                           type="number"
-                           value={formData.roundNumber}
-                           onChange={handleChange}
-                        />
+                        <div>
 
-                        <Input
-                           label="Qualification Count"
-                           name="qualificationCount"
-                           type="number"
-                           value={formData.qualificationCount}
-                           onChange={handleChange}
-                        />
+                           <label className="text-sm text-gray-400">
+
+                              Round Name
+
+                           </label>
+
+                           <select
+                              name="name"
+                              value={formData.name}
+                              onChange={handleChange}
+                              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
+                           >
+
+                              {
+                                 ROUND_OPTIONS.map(
+                                    (
+                                       option
+                                    ) => (
+
+                                       <option
+                                          key={option}
+                                          value={option}
+                                       >
+
+                                          {option}
+
+                                       </option>
+
+                                    )
+                                 )
+                              }
+
+                           </select>
+
+                        </div>
+
+                        {/* QUALIFICATION */}
+
+                        <div>
+
+                           <label className="text-sm text-gray-400">
+
+                              Qualification Count
+
+                           </label>
+
+                           <input
+                              type="number"
+                              min={1}
+                              name="qualificationCount"
+                              value={
+                                 formData.qualificationCount
+                              }
+                              onChange={handleChange}
+                              className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
+                           />
+
+                           <div className="mt-4 rounded-2xl border border-purple-500/20 bg-purple-500/10 p-4">
+
+                              <div className="flex items-start gap-3">
+
+                                 <Trophy
+                                    size={18}
+                                    className="mt-0.5 text-purple-300"
+                                 />
+
+                                 <p className="text-sm leading-relaxed text-purple-200">
+
+                                    Number of teams qualifying
+                                    from this round to the next
+                                    round.
+
+                                 </p>
+
+                              </div>
+
+                           </div>
+
+                        </div>
+
+                        {/* ACTIONS */}
 
                         <div className="flex gap-4 pt-4">
 
@@ -434,7 +507,9 @@ export default function TournamentRoundsPage({
                               }
                               className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
                            >
+
                               Cancel
+
                            </button>
 
                            <button
@@ -445,7 +520,9 @@ export default function TournamentRoundsPage({
 
                               {
                                  creating
+
                                     ? "Creating..."
+
                                     : "Create Round"
                               }
 
@@ -461,30 +538,6 @@ export default function TournamentRoundsPage({
 
             )
          }
-
-      </div>
-
-   );
-
-}
-
-function Input({
-   label,
-   ...props
-}) {
-
-   return (
-
-      <div>
-
-         <label className="text-sm text-gray-400">
-            {label}
-         </label>
-
-         <input
-            {...props}
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none transition focus:border-purple-500"
-         />
 
       </div>
 

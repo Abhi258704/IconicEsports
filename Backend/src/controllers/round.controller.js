@@ -29,15 +29,13 @@ const createRound = asyncHandler(
       const {
          tournamentId,
          name,
-         roundNumber,
          qualificationCount,
          previousRound,
       } = req.body;
 
       if (
          !tournamentId ||
-         !name ||
-         !roundNumber
+         !name
       ) {
 
          throw new ApiError(
@@ -63,6 +61,18 @@ const createRound = asyncHandler(
          );
 
       }
+
+      const lastRound =
+         await Round.findOne({
+            tournament: tournamentId,
+         }).sort({
+            roundNumber: -1,
+         });
+
+      const roundNumber =
+         lastRound
+            ? lastRound.roundNumber + 1
+            : 1;
 
       const existingRound =
          await Round.findOne({
@@ -349,62 +359,62 @@ const getNextRound = asyncHandler(
 );
 
 const updateRound = asyncHandler(
-      async (req, res) => {
+   async (req, res) => {
 
-         const { id } =
-            req.params;
+      const { id } =
+         req.params;
 
-         const {
-            name,
-            qualificationCount,
-         } = req.body;
+      const {
+         name,
+         qualificationCount,
+      } = req.body;
 
-         const round =
-            await Round.findById(id)
-               .populate("groups");
+      const round =
+         await Round.findById(id)
+            .populate("groups");
 
-         if (!round) {
+      if (!round) {
 
-            throw new ApiError(
-               404,
-               "Round not found"
-            );
-
-         }
-
-         const hasLockedQualification =
-            round.groups?.some(
-               group =>
-                  group.qualificationLocked
-            );
-
-         round.name =
-            name || round.name;
-
-         if (
-            !hasLockedQualification &&
-            qualificationCount
-         ) {
-
-            round.qualificationCount =
-               qualificationCount;
-
-         }
-
-         await round.save();
-
-         return res.status(200).json(
-
-            new ApiResponse(
-               200,
-               round,
-               "Round updated successfully"
-            )
-
+         throw new ApiError(
+            404,
+            "Round not found"
          );
 
       }
-   );
+
+      const hasLockedQualification =
+         round.groups?.some(
+            group =>
+               group.qualificationLocked
+         );
+
+      round.name =
+         name || round.name;
+
+      if (
+         !hasLockedQualification &&
+         qualificationCount
+      ) {
+
+         round.qualificationCount =
+            qualificationCount;
+
+      }
+
+      await round.save();
+
+      return res.status(200).json(
+
+         new ApiResponse(
+            200,
+            round,
+            "Round updated successfully"
+         )
+
+      );
+
+   }
+);
 
 
 export {

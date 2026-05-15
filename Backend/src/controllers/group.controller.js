@@ -533,10 +533,40 @@ const moveTeamsToNextRound = asyncHandler(
 
                currentRound:
                   nextRoundId,
+
+               isEliminated: false,
+
+               eliminatedInRound: null,
             }
          );
 
       }
+
+      const eliminatedTeams =
+         currentGroup.teams.filter(
+            teamId =>
+               !selectedTeamIds.some(
+                  selectedId =>
+                     selectedId.toString() ===
+                     teamId.toString()
+               )
+         );
+
+      await Team.updateMany(
+         {
+            _id: {
+               $in: eliminatedTeams
+            }
+         },
+         {
+            isEliminated: true,
+
+            eliminatedInRound:
+               currentGroup.round._id,
+
+            group: null,
+         }
+      );
 
       currentGroup.qualificationLocked =
          true;
@@ -651,6 +681,22 @@ const rollbackQualification = asyncHandler(
             $size: 0
          }
       });
+
+      await Team.updateMany(
+         {
+            _id: {
+               $in:
+                  currentGroup.teams
+            }
+         },
+         {
+            isEliminated: false,
+
+            eliminatedInRound: null,
+
+            group: currentGroup._id,
+         }
+      );
 
       // await Team.updateMany(
       //    {
