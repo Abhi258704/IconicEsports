@@ -15,6 +15,14 @@ import { verifyAdmin } from "../middlewares/admin.middleware.js";
 
 import { upload } from "../middlewares/multer.middleware.js";
 
+import { validate }
+    from "../middlewares/validate.middleware.js";
+
+import {
+    tournamentSchema,
+}
+    from "../validators/tournament.validator.js";
+
 
 
 const router = express.Router();
@@ -25,6 +33,7 @@ router.route("/")
         verifyJWT,
         verifyAdmin,
         upload.single("banner"),
+        validate(tournamentSchema),
         createTournament
     );
 

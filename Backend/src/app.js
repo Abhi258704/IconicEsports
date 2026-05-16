@@ -1,6 +1,12 @@
 import express from "express";
-import cors from "cors"
-import cookieParser from "cookie-parser"
+import cors from "cors";
+import cookieParser from "cookie-parser";
+
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import hpp from "hpp";
+import mongoSanitize from "express-mongo-sanitize";
+
 import authRoutes from "./routes/auth.route.js";
 import userRoutes from "./routes/user.route.js";
 import tournamentRoutes from "./routes/tournament.route.js";
@@ -10,59 +16,139 @@ import groupRoutes from "./routes/group.route.js";
 import matchRoutes from "./routes/match.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
 
+import { errorHandler }
+   from "./middlewares/error.middleware.js";
 
-const app = express()
+const app = express();
+
+
+
+/* SECURITY */
+
+app.use(helmet());
+
+app.use(hpp());
+
+app.use(mongoSanitize());
+
+
+
+
+/* RATE LIMIT */
+
+const limiter = rateLimit({
+
+   windowMs:
+      15 * 60 * 1000,
+
+   max: 300,
+
+   message: {
+      success: false,
+      message:
+         "Too many requests, please try again later",
+   },
+
+});
+
+app.use(limiter);
+
+
+
+
+/* CORS */
 
 app.use(cors({
    origin: "http://localhost:3000",
    credentials: true
-}))
-
-app.use(express.json({ limit: "16kb" }))
-app.use(express.urlencoded({ extended: true, limit: "16kb" }))
-app.use(express.static("public"))
-app.use(cookieParser())
+}));
 
 
 
+
+
+/* BODY PARSERS */
+
+app.use(express.json({
+   limit: "16kb"
+}));
+
+app.use(express.urlencoded({
+   extended: true,
+   limit: "16kb"
+}));
+
+app.use(express.static("public"));
+
+app.use(cookieParser());
+
+
+
+
+// auth limiter
+const authLimiter = rateLimit({
+
+   windowMs:
+      15 * 60 * 1000,
+
+   max: 20,
+
+   message: {
+      success: false,
+      message:
+         "Too many login attempts",
+   },
+
+});
+
+app.use(
+   "/api/v1/auth",
+   authLimiter,
+   authRoutes
+);
+
+
+
+
+/* ROUTES */
 
 // auth
-app.use("/api/v1/auth", authRoutes);
 
-//routes
+// users
 app.use("/api/v1/users", userRoutes);
 
-app.use("/api/v1/tournaments",tournamentRoutes);
+// tournaments
+app.use("/api/v1/tournaments", tournamentRoutes);
 
-app.use("/api/v1/teams",teamRoutes);
+// teams
+app.use("/api/v1/teams", teamRoutes);
 
-app.use("/api/v1/rounds",roundRoutes);
+// rounds
+app.use("/api/v1/rounds", roundRoutes);
 
-app.use("/api/v1/groups",groupRoutes);
+// groups
+app.use("/api/v1/groups", groupRoutes);
 
-app.use("/api/v1/matches",matchRoutes);
+// matches
+app.use("/api/v1/matches", matchRoutes);
 
-app.use("/api/v1/dashboard",dashboardRoutes);
-
-
-
-
-
+// dashboard
+app.use("/api/v1/dashboard", dashboardRoutes);
 
 
-// Global Error Middleware
 
-app.use((err, req, res, next) => {
-   res.status(err.statusCode || 500).json({
-      success: false,
-      message: err.message
-   })
-})
+
+/* TEST */
 
 app.get("/test", (req, res) => {
-   res.send("Server working")
-})
+   res.send("Server working");
+});
 
 
 
-export { app }
+
+/* ERROR HANDLER */
+
+app.use(errorHandler);
+
+export { app };

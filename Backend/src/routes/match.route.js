@@ -15,6 +15,14 @@ from "../middlewares/auth.middleware.js";
 import { verifyAdmin }
 from "../middlewares/admin.middleware.js";
 
+import { validate }
+from "../middlewares/validate.middleware.js";
+
+import {
+   updateMatchResultsSchema,
+}
+from "../validators/match.validator.js";
+
 const router = express.Router();
 
 router.post(
@@ -35,6 +43,7 @@ router.patch(
    "/:id/result",
    verifyJWT,
    verifyAdmin,
+   validate(updateMatchResultsSchema),
    updateMatchResults
 );
 

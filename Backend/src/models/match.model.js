@@ -118,6 +118,19 @@ matchSchema.index(
   }
 );
 
+matchSchema.index({
+   group: 1,
+   status: 1,
+});
+
+matchSchema.index({
+   tournament: 1,
+});
+
+matchSchema.index({
+   round: 1,
+});
+
 const Match = mongoose.model("Match", matchSchema);
 
 export default Match;

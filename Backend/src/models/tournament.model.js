@@ -105,6 +105,18 @@ const tournamentSchema = new mongoose.Schema(
   }
 );
 
+tournamentSchema.index({
+   status: 1,
+});
+
+tournamentSchema.index({
+   isDeleted: 1,
+});
+
+tournamentSchema.index({
+   createdBy: 1,
+});
+
 const Tournament = mongoose.model(
   "Tournament",
   tournamentSchema

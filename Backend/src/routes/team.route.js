@@ -16,6 +16,14 @@ from "../middlewares/auth.middleware.js";
 import { verifyAdmin }
 from "../middlewares/admin.middleware.js";
 
+import { validate }
+from "../middlewares/validate.middleware.js";
+
+import {
+   registerTeamSchema,
+}
+from "../validators/team.validator.js";
+
 
 
 const router = express.Router();
@@ -23,6 +31,7 @@ const router = express.Router();
 router.post(
    "/register",
    verifyJWT,
+   validate(registerTeamSchema),
    registerTeam
 );
 

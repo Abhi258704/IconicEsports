@@ -170,45 +170,48 @@ export default function GroupLeaderboardPage() {
 
       };
 
-   const toggleTeam =
-      (teamId) => {
+   const toggleTeam = (teamId) => {
 
-         const qualificationCount =
-            group?.round?.qualificationCount || 0;
+      const qualificationCount =
+         group?.round?.qualificationCount || 0;
 
-         setSelectedTeams(prev => {
+      const alreadySelected =
+         selectedTeams.includes(teamId);
 
-            if (
-               prev.includes(teamId)
-            ) {
+      if (alreadySelected) {
 
-               return prev.filter(
-                  id => id !== teamId
-               );
+         setSelectedTeams(prev =>
+            prev.filter(
+               id => id !== teamId
+            )
+         );
 
+         return;
+
+      }
+
+      if (
+         selectedTeams.length >=
+         qualificationCount
+      ) {
+
+         toast.error(
+            `Only ${qualificationCount} teams can qualify`,
+            {
+               id: "qualification-limit"
             }
+         );
 
-            if (
-               prev.length >=
-               qualificationCount
-            ) {
+         return;
 
-               toast.error(
-                  `Only ${qualificationCount} teams can qualify`
-               );
+      }
 
-               return prev;
+      setSelectedTeams(prev => [
+         ...prev,
+         teamId
+      ]);
 
-            }
-
-            return [
-               ...prev,
-               teamId
-            ];
-
-         });
-
-      };
+   };
 
    const moveTeams =
       async () => {

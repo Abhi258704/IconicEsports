@@ -16,6 +16,15 @@ import { verifyJWT }
 import { verifyAdmin }
    from "../middlewares/admin.middleware.js";
 
+   import { validate }
+from "../middlewares/validate.middleware.js";
+
+import {
+   moveTeamsToNextRoundSchema,
+   moveTeamsSchema,
+}
+from "../validators/group.validator.js";
+
 const router = express.Router();
 
 router.post(
@@ -29,6 +38,7 @@ router.patch(
    "/move-teams",
    verifyJWT,
    verifyAdmin,
+   validate(moveTeamsSchema),
    moveTeamsToGroup
 );
 
@@ -36,6 +46,7 @@ router.post(
    "/:id/move-to-next-round",
    verifyJWT,
    verifyAdmin,
+   validate(moveTeamsToNextRoundSchema),
    moveTeamsToNextRound
 );
 

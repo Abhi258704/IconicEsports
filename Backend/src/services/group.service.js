@@ -1,0 +1,695 @@
+import Group from "../models/group.model.js";
+
+import Round from "../models/round.model.js";
+
+import Team from "../models/team.model.js";
+
+import Match from "../models/match.model.js";
+
+import Tournament
+from "../models/tournament.model.js";
+
+import { ApiError }
+from "../utils/ApiError.js";
+
+import {
+   withTransaction,
+}
+from "../utils/withTransaction.js";
+
+
+const generateGroupsService =
+   async ({
+      tournamentId,
+      roundId,
+   }) => {
+
+      return await withTransaction(
+         async (session) => {
+
+            const round =
+               await Round.findById(
+                  roundId
+               ).session(session);
+
+            if (!round) {
+
+               throw new ApiError(
+                  404,
+                  "Round not found"
+               );
+
+            }
+
+            const existingGroups =
+               await Group.find({
+                  round: roundId,
+               }).session(session);
+
+            if (
+               existingGroups.length > 0
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "Groups already generated"
+               );
+
+            }
+
+            const tournament =
+               await Tournament.findById(
+                  tournamentId
+               ).session(session);
+
+            if (!tournament) {
+
+               throw new ApiError(
+                  404,
+                  "Tournament not found"
+               );
+
+            }
+
+            let teams = [];
+
+            // ROUND 1
+
+            if (!round.previousRound) {
+
+               teams =
+                  await Team.find({
+
+                     tournament:
+                        tournamentId,
+
+                     status:
+                        "verified",
+
+                     isDeleted:
+                        false,
+
+                  }).session(session);
+
+            }
+
+            // NEXT ROUNDS
+
+            else {
+
+               teams =
+                  await Team.find({
+
+                     tournament:
+                        tournamentId,
+
+                     qualifiedRounds:
+                        round.previousRound,
+
+                     isDeleted:
+                        false,
+
+                  }).session(session);
+
+            }
+
+            if (teams.length === 0) {
+
+               throw new ApiError(
+                  400,
+                  "No eligible teams found"
+               );
+
+            }
+
+            teams.sort(
+               () =>
+                  Math.random() - 0.5
+            );
+
+            const TEAMS_PER_GROUP =
+               tournament.teamsPerGroup ||
+               16;
+
+            const requiredGroups =
+               Math.ceil(
+
+                  teams.length /
+
+                  TEAMS_PER_GROUP
+
+               );
+
+            const createdGroups = [];
+
+            for (
+               let i = 0;
+               i < requiredGroups;
+               i++
+            ) {
+
+               const groupName =
+                  `Group ${String.fromCharCode(
+                     65 + i
+                  )}`;
+
+               const groupTeams =
+                  teams.slice(
+
+                     i *
+                     TEAMS_PER_GROUP,
+
+                     (i + 1) *
+                     TEAMS_PER_GROUP
+
+                  );
+
+               const created =
+                  await Group.create(
+                     [
+                        {
+                           name:
+                              groupName,
+
+                           tournament:
+                              tournamentId,
+
+                           round:
+                              roundId,
+
+                           teams:
+                              groupTeams.map(
+                                 (team) =>
+                                    team._id
+                              ),
+                        },
+                     ],
+                     { session }
+                  );
+
+               const group =
+                  created[0];
+
+               for (
+                  const team
+                  of groupTeams
+               ) {
+
+                  team.group =
+                     group._id;
+
+                  team.currentRound =
+                     roundId;
+
+                  await team.save({
+                     session
+                  });
+
+               }
+
+               round.groups.push(
+                  group._id
+               );
+
+               createdGroups.push(
+                  group
+               );
+
+            }
+
+            await round.save({
+               session
+            });
+
+            return createdGroups;
+
+         }
+      );
+
+   };
+
+const moveTeamsToGroupService =
+   async ({
+      teamIds,
+      fromGroupId,
+      toGroupId,
+   }) => {
+
+      return await withTransaction(
+         async (session) => {
+
+            if (
+               !teamIds?.length ||
+               !fromGroupId ||
+               !toGroupId
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "Missing required fields"
+               );
+
+            }
+
+            if (
+               fromGroupId ===
+               toGroupId
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "Source and target groups cannot be same"
+               );
+
+            }
+
+            const fromGroup =
+               await Group.findById(
+                  fromGroupId
+               ).session(session);
+
+            const toGroup =
+               await Group.findById(
+                  toGroupId
+               ).session(session);
+
+            if (
+               !fromGroup ||
+               !toGroup
+            ) {
+
+               throw new ApiError(
+                  404,
+                  "Group not found"
+               );
+
+            }
+
+            for (
+               const teamId
+               of teamIds
+            ) {
+
+               const exists =
+                  toGroup.teams.some(
+                     (id) =>
+                        id.toString() ===
+                        teamId.toString()
+                  );
+
+               if (!exists) {
+
+                  toGroup.teams.push(
+                     teamId
+                  );
+
+               }
+
+            }
+
+            fromGroup.teams =
+               fromGroup.teams.filter(
+                  (id) =>
+                     !teamIds.some(
+                        (teamId) =>
+                           teamId.toString() ===
+                           id.toString()
+                     )
+               );
+
+            await fromGroup.save({
+               session
+            });
+
+            await toGroup.save({
+               session
+            });
+
+            await Team.updateMany(
+               {
+                  _id: {
+                     $in:
+                        teamIds
+                  }
+               },
+               {
+                  group:
+                     toGroup._id
+               },
+               {
+                  session
+               }
+            );
+
+            return {
+               fromGroup,
+               toGroup,
+            };
+
+         }
+      );
+
+   };
+
+const moveTeamsToNextRoundService =
+   async ({
+      currentGroupId,
+      nextRoundId,
+      selectedTeamIds,
+   }) => {
+
+      await withTransaction(
+         async (session) => {
+
+            const currentGroup =
+               await Group.findById(
+                  currentGroupId
+               )
+                  .populate("round")
+                  .session(session);
+
+            if (!currentGroup) {
+
+               throw new ApiError(
+                  404,
+                  "Current group not found"
+               );
+
+            }
+
+            const nextRound =
+               await Round.findById(
+                  nextRoundId
+               ).session(session);
+
+            if (!nextRound) {
+
+               throw new ApiError(
+                  404,
+                  "Next round not found"
+               );
+
+            }
+
+            const qualificationLimit =
+               currentGroup?.round
+                  ?.qualificationCount || 0;
+
+            if (
+               selectedTeamIds.length !==
+               qualificationLimit
+            ) {
+
+               throw new ApiError(
+                  400,
+                  `Select exactly ${qualificationLimit} teams`
+               );
+
+            }
+
+            let nextGroups =
+               await Group.find({
+                  round:
+                     nextRoundId,
+               }).session(session);
+
+            for (
+               const teamId of selectedTeamIds
+            ) {
+
+               let availableGroup =
+                  nextGroups.find(
+                     group =>
+                        (
+                           group.teams?.length || 0
+                        ) < 16
+                  );
+
+               if (!availableGroup) {
+
+                  const createdGroups =
+                     await Group.create(
+                        [
+                           {
+                              tournament:
+                                 currentGroup.tournament,
+
+                              round:
+                                 nextRoundId,
+
+                              name:
+                                 `Group ${String.fromCharCode(
+                                    65 +
+                                    nextGroups.length
+                                 )}`,
+
+                              teams: [],
+                           },
+                        ],
+                        { session }
+                     );
+
+                  const newGroup =
+                     createdGroups[0];
+
+                  nextGroups.push(
+                     newGroup
+                  );
+
+                  nextRound.groups =
+                     nextRound.groups || [];
+
+                  nextRound.groups.push(
+                     newGroup._id
+                  );
+
+                  await nextRound.save({
+                     session
+                  });
+
+                  availableGroup =
+                     newGroup;
+
+               }
+
+               availableGroup.teams.push(
+                  teamId
+               );
+
+               await availableGroup.save({
+                  session
+               });
+
+               await Team.findByIdAndUpdate(
+                  teamId,
+                  {
+                     group:
+                        availableGroup._id,
+
+                     currentRound:
+                        nextRoundId,
+
+                     isEliminated: false,
+
+                     eliminatedInRound: null,
+                  },
+                  {
+                     session
+                  }
+               );
+
+            }
+
+            const eliminatedTeams =
+               currentGroup.teams.filter(
+                  teamId =>
+                     !selectedTeamIds.some(
+                        selectedId =>
+                           selectedId.toString() ===
+                           teamId.toString()
+                     )
+               );
+
+            await Team.updateMany(
+               {
+                  _id: {
+                     $in: eliminatedTeams
+                  }
+               },
+               {
+                  isEliminated: true,
+
+                  eliminatedInRound:
+                     currentGroup.round._id,
+
+                  group: null,
+               },
+               {
+                  session
+               }
+            );
+
+            currentGroup.qualificationLocked =
+               true;
+
+            currentGroup.qualifiedTeams =
+               selectedTeamIds;
+
+            currentGroup.movedToRound =
+               nextRoundId;
+
+            await currentGroup.save({
+               session
+            });
+
+         }
+      );
+
+   };
+
+const rollbackQualificationService =
+   async ({
+      currentGroupId,
+   }) => {
+
+      await withTransaction(
+         async (session) => {
+
+            const currentGroup =
+               await Group.findById(
+                  currentGroupId
+               ).session(session);
+
+            if (!currentGroup) {
+
+               throw new ApiError(
+                  404,
+                  "Group not found"
+               );
+
+            }
+
+            if (
+               !currentGroup.qualificationLocked
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "Qualification already unlocked"
+               );
+
+            }
+
+            const nextRoundGroups =
+               await Group.find({
+                  round:
+                     currentGroup.movedToRound,
+               }).session(session);
+
+            const nextRoundGroupIds =
+               nextRoundGroups.map(
+                  group => group._id
+               );
+
+            const nextRoundMatches =
+               await Match.find({
+                  group: {
+                     $in:
+                        nextRoundGroupIds
+                  }
+               }).session(session);
+
+            const hasStarted =
+               nextRoundMatches.some(
+                  match =>
+                     match.roomId ||
+                     match.status ===
+                     "completed"
+               );
+
+            if (hasStarted) {
+
+               throw new ApiError(
+                  400,
+                  "Cannot rollback. Next round already started."
+               );
+
+            }
+
+            await Group.updateMany(
+               {
+                  round:
+                     currentGroup.movedToRound,
+               },
+               {
+                  $pull: {
+                     teams: {
+                        $in:
+                           currentGroup.qualifiedTeams
+                     }
+                  }
+               },
+               {
+                  session
+               }
+            );
+
+            await Group.deleteMany(
+               {
+                  round:
+                     currentGroup.movedToRound,
+                  teams: {
+                     $size: 0
+                  }
+               },
+               {
+                  session
+               }
+            );
+
+            await Team.updateMany(
+               {
+                  _id: {
+                     $in:
+                        currentGroup.teams
+                  }
+               },
+               {
+                  isEliminated: false,
+
+                  eliminatedInRound: null,
+
+                  group: currentGroup._id,
+               },
+               {
+                  session
+               }
+            );
+
+            currentGroup.qualificationLocked =
+               false;
+
+            currentGroup.qualifiedTeams =
+               [];
+
+            currentGroup.movedToRound =
+               null;
+
+            await currentGroup.save({
+               session
+            });
+
+         }
+      );
+
+   };
+
+
+
+
+export {
+   generateGroupsService,
+   moveTeamsToGroupService,
+   moveTeamsToNextRoundService,
+   rollbackQualificationService,
+};

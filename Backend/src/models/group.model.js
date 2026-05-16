@@ -50,6 +50,24 @@ const groupSchema = new mongoose.Schema(
   }
 );
 
+groupSchema.index({
+   round: 1,
+});
+
+groupSchema.index({
+   tournament: 1,
+});
+
+groupSchema.index(
+   {
+      round: 1,
+      name: 1,
+   },
+   {
+      unique: true,
+   }
+);
+
 const Group = mongoose.model("Group", groupSchema);
 
 export default Group;

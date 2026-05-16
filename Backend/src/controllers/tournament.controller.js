@@ -32,8 +32,20 @@ const createTournament = asyncHandler(
          startDate,
       } = req.body;
 
-      const parsedMaps =
-         JSON.parse(maps);
+      let parsedMaps = [];
+
+      try {
+
+         parsedMaps = JSON.parse(maps);
+
+      } catch {
+
+         throw new ApiError(
+            400,
+            "Invalid maps format"
+         );
+
+      }
 
       if (!name || !prizePool) {
          throw new ApiError(

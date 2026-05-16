@@ -91,6 +91,19 @@ teamSchema.index(
    }
 );
 
+teamSchema.index({
+   tournament: 1,
+   status: 1,
+});
+
+teamSchema.index({
+   group: 1,
+});
+
+teamSchema.index({
+   currentRound: 1,
+});
+
 
 const Team = mongoose.model("Team", teamSchema);
 
