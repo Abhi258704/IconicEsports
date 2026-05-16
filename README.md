@@ -1,102 +1,152 @@
 # 🎮 Esports Tournament Management Platform
 
-A full-stack esports tournament management platform built for managing BGMI scrims, tournaments, rounds, groups, matches, leaderboards, and team progression.
+A full-stack esports tournament management platform built for managing BGMI scrims, tournaments, rounds, groups, matches, leaderboards, qualification workflows, and LAN-scale tournament operations.
 
-Built with a modern admin-first workflow focused on real tournament operations.
+Designed with a modern admin-first workflow focused on real esports tournament management.
+
+---
+
+# 🚀 Highlights
+
+- Full tournament lifecycle management
+- Automatic group generation system
+- Match scheduling & room management
+- Qualification & progression workflows
+- Rollback-safe tournament operations
+- Transaction-safe critical workflows
+- Live leaderboard aggregation
+- Secure admin-only operations
+- Production-oriented backend architecture
 
 ---
 
 # ✨ Features
 
-## 🏆 Tournament Management
+# 🏆 Tournament Management
 
 - Create and manage tournaments
-- Upload tournament banners
+- Tournament banner uploads
 - Configure:
-  - prize pool
-  - entry fee
-  - maps
-  - team size
-  - max teams
+  - Prize pool
+  - Entry fee
+  - Team size
+  - Max teams
+  - Maps
+  - Teams per group
 - Tournament status management
+- Soft-delete tournament system
 
 ---
 
-## 👥 Team Registration System
+# 👥 Team Registration & Verification
 
-- Team registration flow
-- Google authentication
-- Team verification/rejection
-- Auto group assignment on verification
+- Google OAuth authentication
+- JWT-based authentication
+- Team registration system
 - Duplicate registration prevention
+- Team verification/rejection workflows
+- Automatic group assignment
+- Manual team assignment system
+- Team progression tracking
 
 ---
 
-## 🧩 Automatic Group Management
+# 🧩 Group & Qualification System
 
-- Auto-create groups dynamically
-- Auto-balance teams
+- Dynamic group generation
+- Automatic team balancing
 - Move teams between groups
-- Group-based qualification system
+- Qualification locking system
+- Qualification rollback system
+- Next-round progression engine
+- Elimination tracking
+- Tournament state protection
 
 ---
 
-## 🎯 Match Management
+# 🎯 Match Management
 
-- Create single/multiple matches
-- Match scheduling system
-- IDP time support
+- Match creation system
+- Match scheduling
 - Room ID/password publishing
 - Match start time support
 - Edit match details
+- Match result submission
+- Placement + kill point system
+- Automatic total point calculation
 - Match lifecycle statuses:
-  - Scheduled
-  - Ongoing
+  - Upcoming
+  - Live
   - Completed
 
 ---
 
-## 📊 Leaderboard System
+# 📊 Leaderboard System
 
-- Match result submission
-- Placement + kill points
-- Auto total point calculation
-- Live aggregated leaderboards
-- Group qualification system
+- Group leaderboard aggregation
+- Placement-based ranking
+- Kill-point support
+- Automatic tie-breaking logic
+- Aggregated standings using MongoDB pipelines
 
 ---
 
-## 🔐 Authentication & Authorization
+# 🔐 Security Features
 
-- Google OAuth login
 - JWT authentication
-- Admin-only protected routes
-- Secure tournament operations
+- Admin authorization middleware
+- Helmet security headers
+- Mongo sanitize protection
+- HPP protection
+- Rate limiting
+- Request validation using Zod
+- Protected admin routes
+
+---
+
+# ⚡ Backend Architecture
+
+Built with scalable backend practices:
+
+- Service layer architecture
+- Thin controller pattern
+- Transaction-safe workflows
+- Centralized error handling
+- Reusable transaction utility
+- Validation middleware
+- Indexed MongoDB schemas
+- Workflow integrity protection
 
 ---
 
 # 🛠️ Tech Stack
 
-## Frontend
+# Frontend
 
 - Next.js
-- React
+- React.js
 - Tailwind CSS
 - Axios
 - React Hot Toast
-- Lucide React Icons
+- Lucide React
 
-## Backend
+---
+
+# Backend
 
 - Node.js
 - Express.js
 - MongoDB
 - Mongoose
 - JWT Authentication
+- Zod Validation
 
-## Cloud
+---
 
-- Cloudinary (image uploads)
+# Cloud & Services
+
+- Cloudinary
+- MongoDB Atlas
 
 ---
 
@@ -104,18 +154,64 @@ Built with a modern admin-first workflow focused on real tournament operations.
 
 ```bash
 client/
- ├── app/
- ├── components/
- ├── lib/
- └── styles/
+├── app/
+├── components/
+├── lib/
+├── hooks/
+├── services/
+└── styles/
 
 server/
- ├── controllers/
- ├── models/
- ├── routes/
- ├── middlewares/
- ├── utils/
- └── config/
+├── controllers/
+├── services/
+├── models/
+├── routes/
+├── middlewares/
+├── validators/
+├── utils/
+├── constants/
+└── config/
+```
+
+---
+
+# 🔄 Core Tournament Workflows
+
+## Team Verification Workflow
+
+- Verify pending teams
+- Auto assign into groups
+- Prevent duplicate assignment
+- Handle ongoing tournaments safely
+
+---
+
+## Qualification Workflow
+
+- Lock qualification state
+- Move teams to next rounds
+- Eliminate non-qualified teams
+- Prevent post-lock result editing
+
+---
+
+## Rollback Workflow
+
+- Rollback-safe qualification system
+- Transaction-safe rollback operations
+- Prevent rollback after next round starts
+
+---
+
+# 🧠 Backend Engineering Features
+
+- MongoDB transactions
+- Database indexing
+- Concurrency-safe operations
+- Rollback-safe workflows
+- Service-based business logic
+- Aggregation pipelines
+- Middleware-driven architecture
 
 ---
 
@@ -127,27 +223,68 @@ server/
 ✅ Match management  
 ✅ Leaderboard aggregation  
 ✅ Qualification system  
-✅ Secure admin routes  
+✅ Rollback system  
+✅ Transaction-safe workflows  
+✅ Service-layer architecture  
+✅ Validation middleware  
+✅ Security middleware  
 ✅ Room ID/password management  
+✅ MongoDB indexing optimization  
 
 ---
 
 # 🔮 Planned Features
 
 - Realtime leaderboard updates
-- Socket.io support
+- Socket.IO integration
 - Public tournament pages
 - Public live standings
-- Notifications
-- Scrim automation
 - Tournament analytics
-- Match logs/audit system
-- Mobile responsive optimization
+- Match audit logs
+- Notifications system
+- Excel export system
+- Admin activity logs
+- Redis caching
+- LAN event management tools
+- Mobile optimization
+
+---
+
+# ⚙️ Environment Variables
+
+```env
+PORT=
+
+MONGODB_URI=
+
+JWT_SECRET=
+
+GOOGLE_CLIENT_ID=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+---
+
+# 🚀 Deployment
+
+## Frontend
+- Vercel
+
+## Backend
+- Render / Railway
+
+## Database
+- MongoDB Atlas
 
 ---
 
 # 👨‍💻 Author
 
 Built by Abhishek Singh
+
+Software Engineering Student | Full Stack Developer | Esports Tech Builder
 
 ---
