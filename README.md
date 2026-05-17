@@ -250,31 +250,13 @@ server/
 
 ---
 
-# ⚙️ Environment Variables
-
-```env
-PORT=
-
-MONGODB_URI=
-
-JWT_SECRET=
-
-GOOGLE_CLIENT_ID=
-
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
----
-
-# 🚀 Deployment
+# 🚀 Deployment (wiil be on)
 
 ## Frontend
 - Vercel
 
 ## Backend
-- Render / Railway
+- Render 
 
 ## Database
 - MongoDB Atlas
