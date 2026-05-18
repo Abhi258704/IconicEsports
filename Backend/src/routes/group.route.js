@@ -7,7 +7,8 @@ import {
    getGroupById,
    moveTeamsToGroup,
    moveTeamsToNextRound,
-   rollbackQualification
+   rollbackQualification,
+   assignModeratorToGroup,
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
@@ -16,14 +17,19 @@ import { verifyJWT }
 import { verifyAdmin }
    from "../middlewares/admin.middleware.js";
 
-   import { validate }
-from "../middlewares/validate.middleware.js";
+import {
+   verifyGroupModerator,
+}
+   from "../middlewares/groupModerator.middleware.js";
+
+import { validate }
+   from "../middlewares/validate.middleware.js";
 
 import {
    moveTeamsToNextRoundSchema,
    moveTeamsSchema,
 }
-from "../validators/group.validator.js";
+   from "../validators/group.validator.js";
 
 const router = express.Router();
 
@@ -42,10 +48,17 @@ router.patch(
    moveTeamsToGroup
 );
 
+router.patch(
+   "/:id/assign-moderator",
+   verifyJWT,
+   verifyAdmin,
+   assignModeratorToGroup
+);
+
 router.post(
    "/:id/move-to-next-round",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    validate(moveTeamsToNextRoundSchema),
    moveTeamsToNextRound
 );
@@ -73,7 +86,7 @@ router.get(
 router.get(
    "/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    getGroupById
 );
 

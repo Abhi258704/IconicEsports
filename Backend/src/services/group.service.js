@@ -6,6 +6,8 @@ import Team from "../models/team.model.js";
 
 import Match from "../models/match.model.js";
 
+import User from "../models/user.model.js";
+
 import Tournament
 from "../models/tournament.model.js";
 
@@ -684,6 +686,87 @@ const rollbackQualificationService =
 
    };
 
+   const assignModeratorToGroupService =
+   async ({
+      groupId,
+      moderatorId,
+   }) => {
+
+      return await withTransaction(
+         async (session) => {
+
+            const group =
+               await Group.findById(
+                  groupId
+               ).session(session);
+
+            if (!group) {
+
+               throw new ApiError(
+                  404,
+                  "Group not found"
+               );
+
+            }
+
+            const moderator =
+               await User.findById(
+                  moderatorId
+               ).session(session);
+
+            if (!moderator) {
+
+               throw new ApiError(
+                  404,
+                  "Moderator not found"
+               );
+
+            }
+
+            if (
+               moderator.role !==
+               "moderator"
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "User is not a moderator"
+               );
+
+            }
+
+            const alreadyAssigned =
+               group.moderators.some(
+                  (id) =>
+
+                     id.toString() ===
+                     moderatorId.toString()
+               );
+
+            if (alreadyAssigned) {
+
+               throw new ApiError(
+                  400,
+                  "Moderator already assigned"
+               );
+
+            }
+
+            group.moderators.push(
+               moderatorId
+            );
+
+            await group.save({
+               session
+            });
+
+            return group;
+
+         }
+      );
+
+   };
+
 
 
 
@@ -692,4 +775,5 @@ export {
    moveTeamsToGroupService,
    moveTeamsToNextRoundService,
    rollbackQualificationService,
+   assignModeratorToGroupService,
 };

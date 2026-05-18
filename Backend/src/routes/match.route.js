@@ -10,39 +10,44 @@ import {
 } from "../controllers/match.controller.js";
 
 import { verifyJWT }
-from "../middlewares/auth.middleware.js";
+   from "../middlewares/auth.middleware.js";
 
 import { verifyAdmin }
-from "../middlewares/admin.middleware.js";
+   from "../middlewares/admin.middleware.js";
+
+import {
+   verifyGroupModerator,
+}
+   from "../middlewares/groupModerator.middleware.js";
 
 import { validate }
-from "../middlewares/validate.middleware.js";
+   from "../middlewares/validate.middleware.js";
 
 import {
    updateMatchResultsSchema,
 }
-from "../validators/match.validator.js";
+   from "../validators/match.validator.js";
 
 const router = express.Router();
 
 router.post(
    "/",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    createMatch
 );
 
 router.get(
    "/group/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    getGroupMatches
 );
 
 router.patch(
    "/:id/result",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    validate(updateMatchResultsSchema),
    updateMatchResults
 );
@@ -57,14 +62,14 @@ router.get(
 router.patch(
    "/:id/room",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    updateMatchRoom
 );
 
 router.patch(
    "/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    updateMatch
 );
 

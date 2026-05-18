@@ -4,6 +4,8 @@ import Match from "../models/match.model.js";
 
 import Tournament from "../models/tournament.model.js";
 
+import Group from "../models/group.model.js";
+
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -12,7 +14,6 @@ import { ApiError } from "../utils/ApiError.js";
 
 import Round from "../models/round.model.js";
 
-import Group from "../models/group.model.js";
 
 import {
    verifyTeamService,
@@ -140,26 +141,44 @@ const getTournamentTeams = asyncHandler(
 const getRoundGroups = asyncHandler(
    async (req, res) => {
 
-      const { roundId } =
-         req.params;
+      try {
 
-      const groups =
-         await Group.find({
-            round: id,
-         })
-            .populate("teams")
-            .sort({ name: 1 })
-            .lean();
+         // console.log("PARAMS:", req.params);
 
-      return res.status(200).json(
+         const { roundId } = req.params;
 
-         new ApiResponse(
-            200,
-            groups,
-            "Groups fetched successfully"
-         )
+         // console.log("ROUND ID:", roundId);
 
-      );
+         // console.log("Group model:", Group);
+
+         const groups =
+            await Group.find({
+               round: roundId,
+            })
+               .populate("teams")
+               .sort({ name: 1 })
+               .lean();
+
+         // console.log("GROUPS:", groups);
+
+         return res.status(200).json(
+
+            new ApiResponse(
+               200,
+               groups,
+               "Groups fetched successfully"
+            )
+
+         );
+
+      } catch (error) {
+
+         console.log("GET ROUND GROUPS ERROR:");
+         console.log(error);
+
+         throw error;
+
+      }
 
    }
 );

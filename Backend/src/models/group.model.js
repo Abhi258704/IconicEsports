@@ -44,6 +44,13 @@ const groupSchema = new mongoose.Schema(
       },
     ],
 
+    moderators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
   },
   {
     timestamps: true,
@@ -51,21 +58,21 @@ const groupSchema = new mongoose.Schema(
 );
 
 groupSchema.index({
-   round: 1,
+  round: 1,
 });
 
 groupSchema.index({
-   tournament: 1,
+  tournament: 1,
 });
 
 groupSchema.index(
-   {
-      round: 1,
-      name: 1,
-   },
-   {
-      unique: true,
-   }
+  {
+    round: 1,
+    name: 1,
+  },
+  {
+    unique: true,
+  }
 );
 
 const Group = mongoose.model("Group", groupSchema);

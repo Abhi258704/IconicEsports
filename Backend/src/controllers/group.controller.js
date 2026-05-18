@@ -22,6 +22,7 @@ import {
    moveTeamsToGroupService,
    moveTeamsToNextRoundService,
    rollbackQualificationService,
+   assignModeratorToGroupService,
 }
 from "../services/group.service.js";
 
@@ -291,6 +292,35 @@ const rollbackQualification = asyncHandler(
    }
 );
 
+const assignModeratorToGroup = asyncHandler(async (
+      req,
+      res
+   ) => {
+
+      const group =
+         await assignModeratorToGroupService({
+
+            groupId:
+               req.params.id,
+
+            moderatorId:
+               req.body.moderatorId,
+
+         });
+
+      return res.status(200).json({
+
+         success: true,
+
+         message:
+            "Moderator assigned successfully",
+
+         data: group,
+
+      });
+
+   });
+
 
 export {
    generateGroups,
@@ -300,4 +330,5 @@ export {
    moveTeamsToGroup,
    moveTeamsToNextRound,
    rollbackQualification,
+   assignModeratorToGroup,
 };

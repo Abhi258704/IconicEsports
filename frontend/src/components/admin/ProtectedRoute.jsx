@@ -24,30 +24,32 @@ export default function ProtectedRoute({
          try {
 
             const token =
-               localStorage.getItem(
-                  "token"
-               );
+               localStorage.getItem("token");
 
             if (!token) {
                router.push("/");
                return;
             }
 
-            await API.get(
-               "/users/me"
-            );
+            const res = await API.get("/users/me");
+
+            const user = res.data.data;
+
+            // ADMIN CHECK
+            if (user.role !== "admin") {
+
+               router.push("/");
+               return;
+
+            }
 
             setLoading(false);
 
          } catch (error) {
 
-            localStorage.removeItem(
-               "token"
-            );
+            localStorage.removeItem("token");
 
-            localStorage.removeItem(
-               "user"
-            );
+            localStorage.removeItem("user");
 
             router.push("/");
 
@@ -55,7 +57,7 @@ export default function ProtectedRoute({
 
       };
 
-      verifyUser();
+      verifyUser();     
 
    }, [router]);
 

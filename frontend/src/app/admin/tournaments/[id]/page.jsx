@@ -50,9 +50,11 @@ export default function TournamentDetailsPage({
 
     useEffect(() => {
 
+        if (!id) return;
+
         fetchTournament();
 
-    }, []);
+    }, [id]);
 
     const handleDelete =
         async () => {
@@ -69,7 +71,12 @@ export default function TournamentDetailsPage({
 
             } catch (error) {
 
-                console.log(error);
+                console.log(
+                    "Delete error:",
+                    error?.response?.status,
+                    error?.response?.data,
+                    error
+                );
 
             }
 
@@ -77,6 +84,8 @@ export default function TournamentDetailsPage({
 
     const fetchTournament =
         async () => {
+
+            if (!id) return;
 
             try {
 
@@ -95,7 +104,12 @@ export default function TournamentDetailsPage({
 
             } catch (error) {
 
-                console.log(error);
+                console.log(
+                    "Tournament fetch error:",
+                    error?.response?.status,
+                    error?.response?.data,
+                    error
+                );
 
             } finally {
 
@@ -105,7 +119,7 @@ export default function TournamentDetailsPage({
 
         };
 
-    if (loading) {
+    if (loading || !tournament) {
 
         return (
 
@@ -174,11 +188,9 @@ export default function TournamentDetailsPage({
                         <div className="flex items-center gap-3">
 
                             <button
-                                onClick={() =>
-                                    router.push(
-                                        `/admin/tournaments/${id}/edit`
-                                    )
-                                }
+                                onClick={() => {
+                                    if (id) router.push(`/admin/tournaments/${id}/edit`);
+                                }}
                                 className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-5 py-3 text-sm font-bold text-white transition hover:scale-105"
                             >
 
@@ -315,63 +327,51 @@ export default function TournamentDetailsPage({
 
                 <div className="flex flex-wrap gap-5">
 
-                    <Link
-                        href={`/admin/tournaments/${id}/pending-teams`}
-                        className="inline-flex items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-6 py-4 font-bold text-yellow-400 transition hover:bg-yellow-500/20"
-                    >
+                    {/* 1. Added conditional check: Only render links if id is ready */}
+                    {id && (
+                        <>
+                            <Link
+                                href={`/admin/tournaments/${id}/pending-teams`}
+                                className="inline-flex items-center gap-3 rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-6 py-4 font-bold text-yellow-400 transition hover:bg-yellow-500/20"
+                            >
+                                Pending Teams ({stats?.pendingTeams || 0})
+                            </Link>
 
-                        Pending Teams
-                        ({stats?.pendingTeams || 0})
+                            <Link
+                                href={`/admin/tournaments/${id}/teams`}
+                                className="inline-flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-4 font-bold text-cyan-400 transition hover:bg-cyan-500/20"
+                            >
+                                All Teams ({stats?.totalTeams || 0})
+                            </Link>
 
-                    </Link>
-
-                    <Link
-                        href={`/admin/tournaments/${id}/teams`}
-                        className="inline-flex items-center gap-3 rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-6 py-4 font-bold text-cyan-400 transition hover:bg-cyan-500/20"
-                    >
-
-                        All Teams
-                        ({stats?.totalTeams || 0})
-
-                    </Link>
-
-                    <Link
-                        href={`/admin/tournaments/${id}/rounds`}
-                        className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
-                    >
-
-                        Manage Rounds
-
-                    </Link>
+                            <Link
+                                href={`/admin/tournaments/${id}/rounds`}
+                                className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-500 to-cyan-500 px-6 py-4 font-bold text-white transition hover:scale-105"
+                            >
+                                Manage Rounds
+                            </Link>
+                        </>
+                    )}
 
                 </div>
 
                 <div className="lg:text-right">
-
                     <p className="uppercase tracking-[0.25em] text-xs text-gray-400">
                         Tournament Status
                     </p>
-
                     <div
                         className={`mt-3 inline-flex rounded-2xl px-5 py-3 text-sm font-bold
-
-                        ${tournament.status === "registration-open"
+            ${tournament.status === "registration-open"
                                 ? "bg-emerald-500/20 text-emerald-400"
-
                                 : tournament.status === "ongoing"
                                     ? "bg-cyan-500/20 text-cyan-400"
-
                                     : tournament.status === "completed"
                                         ? "bg-red-500/20 text-red-400"
-
                                         : "bg-yellow-500/20 text-yellow-400"
                             }`}
                     >
-
                         {tournament.status}
-
                     </div>
-
                 </div>
 
             </div>
