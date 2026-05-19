@@ -2,16 +2,21 @@
 
 import axios from "axios";
 
-import { GoogleLogin }
+import {
+   GoogleLogin,
+}
    from "@react-oauth/google";
 
-import { useRouter }
+import {
+   useRouter,
+}
    from "next/navigation";
 
 import {
    useEffect,
    useState,
-} from "react";
+}
+   from "react";
 
 export default function Home() {
 
@@ -20,68 +25,123 @@ export default function Home() {
 
    const [
       showLogin,
-      setShowLogin,
-   ] = useState(false);
+      setShowLogin
+   ] =
+      useState(false);
 
    useEffect(() => {
 
-      const token =
-         localStorage.getItem(
-            "token"
-         );
+      const checkUser =
+         async () => {
 
-      if (!token) {
+            const token =
+               localStorage.getItem(
+                  "token"
+               );
 
-         setShowLogin(
-            true
-         );
+            if (
+               !token
+            ) {
 
-         return;
+               setShowLogin(
+                  true
+               );
 
-      }
+               return;
 
-      const user =
-         JSON.parse(
+            }
 
-            localStorage.getItem(
-               "user"
-            )
+            try {
 
-         );
+               const res =
+                  await axios.get(
 
-      if (
-         user?.role ===
-         "admin"
-      ) {
+                     "http://localhost:8000/api/v1/users/me",
 
-         router.replace(
-            "/admin"
-         );
+                     {
 
-      }
+                        headers: {
 
-      else if (
+                           Authorization:
 
-         user?.role ===
-         "moderator"
+                              `Bearer ${token}`
 
-      ) {
+                        }
 
-         router.replace(
-            "/moderator"
-         );
+                     }
 
-      }
+                  );
 
-      else {
+               const user =
+                  res.data.data;
 
-         router.replace(
-            "/user"
-         );
+               /* sync local */
 
-      }
+               localStorage.setItem(
 
-   }, [router]);
+                  "user",
+
+                  JSON.stringify(
+                     user
+                  )
+
+               );
+
+               if (
+                  user.role ===
+                  "admin"
+               ) {
+
+                  router.replace(
+                     "/admin"
+                  );
+
+               }
+
+               else if (
+                  user.role ===
+                  "moderator"
+               ) {
+
+                  router.replace(
+                     "/moderator"
+                  );
+
+               }
+
+               else {
+
+                  router.replace(
+                     "/user"
+                  );
+
+               }
+
+            }
+
+            catch {
+
+               localStorage.removeItem(
+                  "token"
+               );
+
+               localStorage.removeItem(
+                  "user"
+               );
+
+               setShowLogin(
+                  true
+               );
+
+            }
+
+         };
+
+      checkUser();
+
+   }, [
+      router
+   ]);
 
    const handleSuccess =
       async (
@@ -96,9 +156,12 @@ export default function Home() {
                   "http://localhost:8000/api/v1/auth/google",
 
                   {
+
                      credential:
+
                         credentialResponse
-                           .credential,
+                           .credential
+
                   }
 
                );
@@ -111,26 +174,43 @@ export default function Home() {
 
             );
 
+            /* fetch fresh role */
+
+            const me =
+               await axios.get(
+
+                  "http://localhost:8000/api/v1/users/me",
+
+                  {
+
+                     headers: {
+
+                        Authorization:
+
+                           `Bearer ${res.data.data.token}`
+
+                     }
+
+                  }
+
+               );
+
+            const user =
+               me.data.data;
+
             localStorage.setItem(
 
                "user",
 
                JSON.stringify(
-
-                  res.data.data.user
-
+                  user
                )
 
             );
 
-            const user =
-               res.data.data.user;
-
             if (
-
                user.role ===
                "admin"
-
             ) {
 
                router.push(
@@ -140,10 +220,8 @@ export default function Home() {
             }
 
             else if (
-
                user.role ===
                "moderator"
-
             ) {
 
                router.push(
@@ -159,9 +237,12 @@ export default function Home() {
                );
 
             }
+
          }
 
-         catch (error) {
+         catch (
+         error
+         ) {
 
             console.log(
                error
@@ -171,7 +252,9 @@ export default function Home() {
 
       };
 
-   if (!showLogin) {
+   if (
+      !showLogin
+   ) {
 
       return null;
 
@@ -179,17 +262,22 @@ export default function Home() {
 
    return (
 
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="min-h-screen flex items-center justify-center">
 
          <GoogleLogin
+
             onSuccess={
                handleSuccess
             }
-            onError={() => {
+
+            onError={() =>
+
                console.log(
                   "FAILED"
-               );
-            }}
+               )
+
+            }
+
          />
 
       </div>
