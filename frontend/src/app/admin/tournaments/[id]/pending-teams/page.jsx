@@ -82,10 +82,10 @@ export default function PendingTeamsPage({
       useState("");
 
    useEffect(() => {
+      if (!id) return;
 
       fetchPendingTeams();
-
-   }, []);
+   }, [id]);
 
    useEffect(() => {
 
@@ -106,6 +106,8 @@ export default function PendingTeamsPage({
 
    const fetchPendingTeams =
       async () => {
+
+          if (!id) return;
 
          try {
 

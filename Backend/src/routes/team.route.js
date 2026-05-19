@@ -11,18 +11,23 @@ import {
 } from "../controllers/team.controller.js";
 
 import { verifyJWT }
-from "../middlewares/auth.middleware.js";
+   from "../middlewares/auth.middleware.js";
 
 import { verifyAdmin }
-from "../middlewares/admin.middleware.js";
+   from "../middlewares/admin.middleware.js";
 
 import { validate }
-from "../middlewares/validate.middleware.js";
+   from "../middlewares/validate.middleware.js";
 
 import {
    registerTeamSchema,
 }
-from "../validators/team.validator.js";
+   from "../validators/team.validator.js";
+
+import {
+   verifyModerator,
+}
+   from "../middlewares/moderator.middleware.js";
 
 
 
@@ -45,7 +50,7 @@ router.get(
 router.get(
    "/:teamId",
    verifyJWT,
-   verifyAdmin,
+   verifyModerator,
    getTeamById
 );
 

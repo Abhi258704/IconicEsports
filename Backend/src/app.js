@@ -15,6 +15,8 @@ import roundRoutes from "./routes/round.route.js";
 import groupRoutes from "./routes/group.route.js";
 import matchRoutes from "./routes/match.route.js";
 import dashboardRoutes from "./routes/dashboard.route.js";
+import moderatorRoutes
+from "./routes/moderator.route.js";
 
 import { errorHandler }
    from "./middlewares/error.middleware.js";
@@ -138,6 +140,10 @@ app.use("/api/v1/matches", matchRoutes);
 
 // dashboard
 app.use("/api/v1/dashboard", dashboardRoutes);
+
+
+// moderator
+app.use("/api/v1/moderator",moderatorRoutes);
 
 
 

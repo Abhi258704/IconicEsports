@@ -8,69 +8,174 @@ import { GoogleLogin }
 import { useRouter }
    from "next/navigation";
 
+import {
+   useEffect,
+   useState,
+} from "react";
+
 export default function Home() {
 
-   const router = useRouter();
+   const router =
+      useRouter();
 
-   const handleSuccess = async (
-      credentialResponse
-   ) => {
+   const [
+      showLogin,
+      setShowLogin,
+   ] = useState(false);
 
-      console.log("SUCCESS");
+   useEffect(() => {
 
-      // console.log(
-      //    credentialResponse
-      // );
-
-      try {
-
-         const res =
-            await axios.post(
-               "http://localhost:8000/api/v1/auth/google",
-               {
-                  credential:
-                     credentialResponse.credential,
-               }
-            );
-
-         console.log(
-            "BACKEND RESPONSE:"
+      const token =
+         localStorage.getItem(
+            "token"
          );
 
-         // console.log(res.data);
+      if (!token) {
 
-         // STORE JWT
-         localStorage.setItem(
-            "token",
-            res.data.data.token
+         setShowLogin(
+            true
          );
 
-         // STORE USER
-         localStorage.setItem(
-            "user",
-            JSON.stringify(
-               res.data.data.user
-            )
-         );
-
-         // console.log(
-         //    "LOGIN SUCCESS"
-         // );
-
-         // REDIRECT
-         router.push("/admin");
-
-      } catch (error) {
-
-         console.log(
-            "AXIOS ERROR:"
-         );
-
-         console.log(error);
+         return;
 
       }
 
-   };
+      const user =
+         JSON.parse(
+
+            localStorage.getItem(
+               "user"
+            )
+
+         );
+
+      if (
+         user?.role ===
+         "admin"
+      ) {
+
+         router.replace(
+            "/admin"
+         );
+
+      }
+
+      else if (
+
+         user?.role ===
+         "moderator"
+
+      ) {
+
+         router.replace(
+            "/moderator"
+         );
+
+      }
+
+      else {
+
+         router.replace(
+            "/user"
+         );
+
+      }
+
+   }, [router]);
+
+   const handleSuccess =
+      async (
+         credentialResponse
+      ) => {
+
+         try {
+
+            const res =
+               await axios.post(
+
+                  "http://localhost:8000/api/v1/auth/google",
+
+                  {
+                     credential:
+                        credentialResponse
+                           .credential,
+                  }
+
+               );
+
+            localStorage.setItem(
+
+               "token",
+
+               res.data.data.token
+
+            );
+
+            localStorage.setItem(
+
+               "user",
+
+               JSON.stringify(
+
+                  res.data.data.user
+
+               )
+
+            );
+
+            const user =
+               res.data.data.user;
+
+            if (
+
+               user.role ===
+               "admin"
+
+            ) {
+
+               router.push(
+                  "/admin"
+               );
+
+            }
+
+            else if (
+
+               user.role ===
+               "moderator"
+
+            ) {
+
+               router.push(
+                  "/moderator"
+               );
+
+            }
+
+            else {
+
+               router.push(
+                  "/user"
+               );
+
+            }
+         }
+
+         catch (error) {
+
+            console.log(
+               error
+            );
+
+         }
+
+      };
+
+   if (!showLogin) {
+
+      return null;
+
+   }
 
    return (
 
@@ -80,9 +185,10 @@ export default function Home() {
             onSuccess={
                handleSuccess
             }
-
             onError={() => {
-               console.log("FAILED");
+               console.log(
+                  "FAILED"
+               );
             }}
          />
 

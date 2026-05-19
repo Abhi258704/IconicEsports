@@ -15,24 +15,25 @@ export default function AdminLayout({
    children,
 }) {
 
+   const navClass =
+      "group flex items-center gap-3 px-5 py-4 rounded-2xl border border-transparent bg-white/[0.03] transition duration-300 hover:-translate-y-1 hover:border-purple-500/30 hover:bg-purple-500/[0.06]";
+
+   const iconClass =
+      "transition group-hover:scale-110 group-hover:text-purple-400";
+
    return (
 
       <div className="min-h-screen flex bg-[#050505] text-white">
 
          {/* SIDEBAR */}
+
          <aside className="w-72 border-r border-purple-500/20 bg-black p-6">
 
             <div className="mb-14 flex flex-col items-center">
 
-               {/* LOGO */}
-
                <div className="relative">
 
-                  {/* OUTER GLOW */}
-
                   <div className="absolute inset-0 rounded-[2rem] bg-purple-500/30 blur-3xl" />
-
-                  {/* LOGO BOX */}
 
                   <div className="relative flex h-38 w-38 items-center justify-center rounded-[2rem] border border-purple-500/30 bg-gradient-to-br from-[#161616] via-black to-[#0b0b0b] shadow-[0_0_60px_rgba(168,85,247,0.25)] overflow-hidden">
 
@@ -49,16 +50,18 @@ export default function AdminLayout({
 
                </div>
 
-               {/* BRAND */}
-
                <div className="mt-6 text-center">
 
                   <h1 className="text-4xl font-black tracking-wide bg-gradient-to-r from-purple-400 via-pink-500 to-cyan-400 bg-clip-text text-transparent">
+
                      ICONIC
+
                   </h1>
 
                   <p className="mt-2 text-xs uppercase tracking-[0.45em] text-gray-500">
+
                      ESPORTS CONTROL PANEL
+
                   </p>
 
                </div>
@@ -69,57 +72,76 @@ export default function AdminLayout({
 
                <Link
                   href="/admin"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  className={navClass}
                >
-                  <Trophy size={18} />
+                  <Trophy
+                     size={18}
+                     className={iconClass}
+                  />
                   Dashboard
                </Link>
 
                <Link
                   href="/admin/tournaments"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  className={navClass}
                >
-                  <Trophy size={18} />
+                  <Trophy
+                     size={18}
+                     className={iconClass}
+                  />
                   Tournaments
                </Link>
 
                <Link
                   href="/admin/teams"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  className={navClass}
                >
-                  <Users size={18} />
+                  <Users
+                     size={18}
+                     className={iconClass}
+                  />
                   Teams
                </Link>
 
                <Link
-                   href="/admin/rounds"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  href="/admin/rounds"
+                  className={navClass}
                >
-                  <Layers3 size={18} />
+                  <Layers3
+                     size={18}
+                     className={iconClass}
+                  />
                   Rounds
                </Link>
 
-               <Link
+               {/* <Link
                   href="/admin/groups"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  className={navClass}
                >
-                  <Boxes size={18} />
+                  <Boxes
+                     size={18}
+                     className={iconClass}
+                  />
                   Groups
                </Link>
 
                <Link
                   href="/admin/matches"
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-purple-500/20 transition"
+                  className={navClass}
                >
-                  <Swords size={18} />
+                  <Swords
+                     size={18}
+                     className={iconClass}
+                  />
                   Matches
-               </Link>
+               </Link> */}
 
             </nav>
 
          </aside>
 
          {/* MAIN */}
+
          <main className="flex-1 p-8 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.15),transparent_35%),#050505]">
 
             {children}

@@ -63,13 +63,15 @@ export default function TournamentRoundsPage({
       });
 
    useEffect(() => {
+      if (!id) return;
 
       fetchRounds();
-
-   }, []);
+   }, [id]);
 
    const fetchRounds =
       async () => {
+
+          if (!id) return;
 
          try {
 
@@ -295,19 +297,18 @@ export default function TournamentRoundsPage({
                                     <div
                                        className={`rounded-2xl px-4 py-2 text-sm font-bold
 
-                                       ${
-                                          round.status ===
-                                          "completed"
+                                       ${round.status ===
+                                             "completed"
 
                                              ? "bg-green-500/20 text-green-400"
 
                                              : round.status ===
-                                               "ongoing"
+                                                "ongoing"
 
-                                             ? "bg-cyan-500/20 text-cyan-400"
+                                                ? "bg-cyan-500/20 text-cyan-400"
 
-                                             : "bg-yellow-500/20 text-yellow-400"
-                                       }`}
+                                                : "bg-yellow-500/20 text-yellow-400"
+                                          }`}
                                     >
 
                                        {round.status}

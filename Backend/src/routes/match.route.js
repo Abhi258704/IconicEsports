@@ -55,7 +55,7 @@ router.patch(
 router.get(
    "/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyGroupModerator,
    getSingleMatch
 );
 

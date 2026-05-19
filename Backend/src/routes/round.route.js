@@ -9,10 +9,15 @@ import {
 } from "../controllers/round.controller.js";
 
 import { verifyJWT }
-from "../middlewares/auth.middleware.js";
+   from "../middlewares/auth.middleware.js";
 
 import { verifyAdmin }
-from "../middlewares/admin.middleware.js";
+   from "../middlewares/admin.middleware.js";
+
+import {
+verifyModerator,
+}
+from "../middlewares/moderator.middleware.js";
 
 const router = express.Router();
 
@@ -33,7 +38,7 @@ router.get(
 router.get(
    "/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyModerator,
    getRoundById
 );
 

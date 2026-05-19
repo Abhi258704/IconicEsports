@@ -26,7 +26,7 @@ export default function TournamentTeamsPage({
       useState([]);
 
    const [filteredTeams,
-   setFilteredTeams] =
+      setFilteredTeams] =
       useState([]);
 
    const [loading, setLoading] =
@@ -36,10 +36,10 @@ export default function TournamentTeamsPage({
       useState("");
 
    useEffect(() => {
+      if (!id) return;
 
       fetchTeams();
-
-   }, []);
+   }, [id]);
 
    useEffect(() => {
 
@@ -60,6 +60,8 @@ export default function TournamentTeamsPage({
 
    const fetchTeams =
       async () => {
+
+          if (!id) return;
 
          try {
 
@@ -209,19 +211,18 @@ export default function TournamentTeamsPage({
                                     <div
                                        className={`rounded-2xl px-4 py-2 text-sm font-bold
 
-                                       ${
-                                          team.status ===
-                                          "verified"
+                                       ${team.status ===
+                                             "verified"
 
                                              ? "bg-green-500/20 text-green-400"
 
                                              : team.status ===
-                                               "rejected"
+                                                "rejected"
 
-                                             ? "bg-red-500/20 text-red-400"
+                                                ? "bg-red-500/20 text-red-400"
 
-                                             : "bg-yellow-500/20 text-yellow-400"
-                                       }`}
+                                                : "bg-yellow-500/20 text-yellow-400"
+                                          }`}
                                     >
 
                                        {team.status}
