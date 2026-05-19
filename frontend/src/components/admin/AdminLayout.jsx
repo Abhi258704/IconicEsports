@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 
 import {
+
    Trophy,
+
    Users,
-   Layers3,
-   Boxes,
-   Swords,
+
+   Shield,
+
 } from "lucide-react";
 
 export default function AdminLayout({
@@ -90,6 +92,34 @@ export default function AdminLayout({
                      className={iconClass}
                   />
                   Tournaments
+               </Link>
+
+               <Link
+                  href="/admin/moderators"
+                  className={navClass}
+               >
+
+                  <Shield
+                     size={18}
+                     className={iconClass}
+                  />
+
+                  Moderators
+
+               </Link>
+
+                <Link
+                  href="/admin/users"
+                  className={navClass}
+               >
+
+                  <Users
+                     size={18}
+                     className={iconClass}
+                  />
+
+                  Users
+
                </Link>
 
                {/* <Link

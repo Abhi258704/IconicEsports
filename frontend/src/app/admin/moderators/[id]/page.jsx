@@ -287,6 +287,69 @@ export default function ModeratorPage() {
 
 
 
+    const removeGroup =
+        async (
+            groupId
+        ) => {
+
+            try {
+
+                // console.log(
+                //     "REMOVING",
+                //     groupId
+                // );
+
+                const res =
+                    await API({
+
+                        method:
+                            "PATCH",
+
+                        url:
+                            `/groups/${groupId}/remove-moderator`,
+
+                        data: {
+
+                            moderatorId:
+                                moderator._id
+
+                        },
+
+                    });
+
+                // console.log(
+                //     res.data
+                // );
+
+                toast.success(
+                    "Removed"
+                );
+
+                await fetchPage();
+
+            }
+
+            catch (error) {
+
+                console.log(
+                    "FRONT ERR",
+                    error
+                );
+
+                toast.error(
+
+                    error?.response?.data?.message ||
+
+                    error?.message ||
+
+                    "Remove failed"
+
+                );
+
+            }
+
+        };
+
     const assignGroup =
         async () => {
 
@@ -729,15 +792,13 @@ export default function ModeratorPage() {
 
                                             g => (
 
-                                                <Link
+                                                <div
 
                                                     key={
                                                         g._id
                                                     }
 
-                                                    href={`/admin/groups/${g._id}`}
-
-                                                    className="rounded-3xl border border-cyan-500/20 p-8 hover:border-cyan-500"
+                                                    className="group rounded-3xl border border-cyan-500/20 bg-white/[0.03] p-8 transition hover:border-cyan-500"
 
                                                 >
 
@@ -745,9 +806,9 @@ export default function ModeratorPage() {
 
                                                         <div>
 
-                                                            <p className="text-cyan-400">
+                                                            <p className="text-cyan-400 text-xs uppercase">
 
-                                                                GROUP
+                                                                Group
 
                                                             </p>
 
@@ -759,11 +820,41 @@ export default function ModeratorPage() {
 
                                                         </div>
 
-                                                        <ChevronRight />
+                                                        <button
+
+                                                            onClick={() =>
+
+                                                                removeGroup(
+                                                                    g._id
+                                                                )
+
+                                                            }
+
+                                                            className="rounded-2xl bg-red-500/10 px-5 py-3 text-red-400 transition hover:bg-red-500 hover:text-white"
+
+                                                        >
+
+                                                            Remove
+
+                                                        </button>
 
                                                     </div>
 
-                                                </Link>
+                                                    <Link
+
+                                                        href={`/admin/groups/${g._id}`}
+
+                                                        className="mt-8 inline-flex items-center gap-2 text-cyan-400"
+
+                                                    >
+
+                                                        Open
+
+                                                        <ChevronRight />
+
+                                                    </Link>
+
+                                                </div>
 
                                             )
 

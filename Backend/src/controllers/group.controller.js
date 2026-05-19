@@ -24,7 +24,7 @@ import {
    rollbackQualificationService,
    assignModeratorToGroupService,
 }
-from "../services/group.service.js";
+   from "../services/group.service.js";
 
 
 
@@ -293,33 +293,106 @@ const rollbackQualification = asyncHandler(
 );
 
 const assignModeratorToGroup = asyncHandler(async (
-      req,
-      res
-   ) => {
+   req,
+   res
+) => {
 
-      const group =
-         await assignModeratorToGroupService({
+   const group =
+      await assignModeratorToGroupService({
 
-            groupId:
-               req.params.id,
+         groupId:
+            req.params.id,
 
-            moderatorId:
-               req.body.moderatorId,
-
-         });
-
-      return res.status(200).json({
-
-         success: true,
-
-         message:
-            "Moderator assigned successfully",
-
-         data: group,
+         moderatorId:
+            req.body.moderatorId,
 
       });
 
+   return res.status(200).json({
+
+      success: true,
+
+      message:
+         "Moderator assigned successfully",
+
+      data: group,
+
    });
+
+});
+
+const removeModeratorFromGroup =
+   asyncHandler(
+      async (
+         req,
+         res
+      ) => {
+
+         try {
+
+            // console.log(
+            //    "GROUP:",
+            //    req.params.id
+            // );
+
+            // console.log(
+            //    "MOD:",
+            //    req.body
+            // );
+
+            const group =
+               await Group.findById(
+                  req.params.id
+               );
+
+            // console.log(
+            //    "FOUND:",
+            //    group
+            // );
+
+            if (
+               !group
+            ) {
+
+               throw new ApiError(
+                  404,
+                  "Group not found"
+               );
+
+            }
+
+            group.moderators.pull(
+               req.body.moderatorId
+            );
+
+            await group.save();
+
+            return res.status(200).json(
+
+               new ApiResponse(
+                  200,
+                  group,
+                  "Removed"
+               )
+
+            );
+
+         }
+
+         catch (error) {
+
+            console.log(
+               "REMOVE ERR:",
+               error
+            );
+
+            throw error;
+
+         }
+
+      }
+   );
+
 
 
 export {
@@ -331,4 +404,5 @@ export {
    moveTeamsToNextRound,
    rollbackQualification,
    assignModeratorToGroup,
+   removeModeratorFromGroup,
 };

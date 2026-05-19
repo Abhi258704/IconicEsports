@@ -9,6 +9,7 @@ import {
    moveTeamsToNextRound,
    rollbackQualification,
    assignModeratorToGroup,
+   removeModeratorFromGroup,
 } from "../controllers/group.controller.js";
 
 import { verifyJWT }
@@ -53,6 +54,13 @@ router.patch(
    verifyJWT,
    verifyAdmin,
    assignModeratorToGroup
+);
+
+router.patch(
+   "/:id/remove-moderator",
+   verifyJWT,
+   verifyAdmin,
+   removeModeratorFromGroup
 );
 
 router.post(
