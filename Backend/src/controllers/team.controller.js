@@ -20,97 +20,180 @@ import {
    manualAssignTeamService,
    rejectTeamService,
 }
-from "../services/team.service.js";
+   from "../services/team.service.js";
 
 
 
 
 
 const registerTeam = asyncHandler(
-   async (req, res) => {
+   async (
+      req,
+      res
+   ) => {
 
       const {
+
          teamName,
+
          leaderName,
+
          leaderPhone,
+
          players,
+
          tournamentId,
-      } = req.body;
 
-      if (
-         !teamName ||
-         !leaderName ||
-         !leaderPhone ||
-         !players ||
-         !tournamentId
-      ) {
-
-         throw new ApiError(
-            400,
-            "All fields are required"
-         );
-
-      }
+      } =
+         req.body;
 
       const tournament =
+
          await Tournament.findById(
+
             tournamentId
+
          );
 
       if (
+
          !tournament ||
+
          tournament.isDeleted
+
       ) {
 
          throw new ApiError(
+
             404,
+
             "Tournament not found"
+
          );
 
       }
 
-      if (!tournament.registrationOpen) {
+      if (
+
+         !tournament.registrationOpen
+
+      ) {
 
          throw new ApiError(
+
             400,
+
             "Tournament registrations are closed"
+
          );
 
       }
+
+      if (
+
+         players.length < 4 ||
+
+         players.length > 5
+
+      ) {
+
+         throw new ApiError(
+
+            400,
+
+            "Invalid player count"
+
+         );
+
+      }
+
+      const cleanedPlayers =
+
+         players.filter(
+
+            (
+               player
+            ) =>
+
+               player.ign ||
+
+               player.uid ||
+
+               player.phone
+
+         );
 
       const existingTeam =
+
          await Team.findOne({
-            tournament: tournamentId,
-            registeredBy: req.user._id,
-            isDeleted: false,
+
+            tournament:
+               tournamentId,
+
+            registeredBy:
+               req.user._id,
+
+            isDeleted:
+               false,
+
          });
 
-      if (existingTeam) {
+      if (
+
+         existingTeam
+
+      ) {
 
          throw new ApiError(
+
             400,
+
             "You already registered a team in this tournament"
+
          );
 
       }
 
       const team =
+
          await Team.create({
+
             teamName,
+
             leaderName,
+
             leaderPhone,
-            players,
-            tournament: tournamentId,
-            registeredBy: req.user._id,
+
+            players:
+               cleanedPlayers,
+
+            tournament:
+               tournamentId,
+
+            registeredBy:
+               req.user._id,
+
          });
 
-      return res.status(201).json(
-         new ApiResponse(
-            201,
-            team,
-            "Team registered successfully"
+      return res
+
+         .status(
+            201
          )
-      );
+
+         .json(
+
+            new ApiResponse(
+
+               201,
+
+               team,
+
+               "Team registered successfully"
+
+            )
+
+         );
 
    }
 );
@@ -275,6 +358,39 @@ const getTeamById = asyncHandler(
                "registeredBy",
                "email username"
             );
+
+      if (
+
+         req.user.role ===
+         "user"
+
+         &&
+
+         team
+
+         &&
+
+         team.registeredBy
+
+         &&
+
+         team.registeredBy._id.toString()
+
+         !==
+
+         req.user._id.toString()
+
+      ) {
+
+         throw new ApiError(
+
+            403,
+
+            "Forbidden"
+
+         );
+
+      }
 
       if (!team) {
 

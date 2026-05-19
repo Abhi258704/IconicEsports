@@ -50,7 +50,6 @@ router.get(
 router.get(
    "/:teamId",
    verifyJWT,
-   verifyModerator,
    getTeamById
 );
 

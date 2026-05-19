@@ -23,6 +23,8 @@ import {
 
     getModerator,
 
+    getMyTeams,
+
 }
     from "../controllers/user.controller.js";
 
@@ -47,6 +49,12 @@ router.get(
     verifyJWT,
     verifyAdmin,
     getModerators
+);
+
+router.get(
+    "/my-teams",
+    verifyJWT,
+    getMyTeams
 );
 
 router.get(

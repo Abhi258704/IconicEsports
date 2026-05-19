@@ -1,5 +1,8 @@
 import User from "../models/user.model.js";
 
+import Team
+   from "../models/team.model.js";
+
 import Group
    from "../models/group.model.js";
 
@@ -338,6 +341,65 @@ const getModerator =
       }
    );
 
+const getMyTeams =
+   asyncHandler(
+
+      async (
+         req,
+         res
+      ) => {
+
+         const teams =
+
+            await Team.find({
+
+               registeredBy:
+                  req.user._id,
+
+               isDeleted:
+                  false,
+
+            })
+
+               .populate(
+
+                  "tournament",
+
+                  "name banner"
+
+               )
+
+               .sort({
+
+                  createdAt:
+                     -1,
+
+               });
+
+         return res
+
+            .status(
+               200
+            )
+
+            .json(
+
+               new ApiResponse(
+
+                  200,
+
+                  teams,
+
+                  "My teams fetched"
+
+               )
+
+            );
+
+      }
+
+   );
+
 
 
 export {
@@ -351,4 +413,6 @@ export {
    getModerators,
 
    getModerator,
+
+   getMyTeams,
 };
