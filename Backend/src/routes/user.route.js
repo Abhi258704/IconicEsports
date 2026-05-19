@@ -25,6 +25,10 @@ import {
 
     getMyTeams,
 
+    getCurrentMatch,
+
+    getAllMatches,
+
 }
     from "../controllers/user.controller.js";
 
@@ -55,6 +59,23 @@ router.get(
     "/my-teams",
     verifyJWT,
     getMyTeams
+);
+
+// router.get(
+//     "/my-teams/:teamId/matches",
+//     verifyJWT,
+//     getMyTeamMatches
+// );
+router.get(
+    "/my-teams/:teamId/current-match",
+    verifyJWT,
+    getCurrentMatch
+);
+
+router.get(
+    "/my-teams/:teamId/matches",
+    verifyJWT,
+    getAllMatches
 );
 
 router.get(

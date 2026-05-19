@@ -331,33 +331,74 @@ const rejectTeam = asyncHandler(
 );
 
 const getTeamById = asyncHandler(
-   async (req, res) => {
 
-      const { teamId } =
+   async (
+      req,
+      res
+   ) => {
+
+      const {
+         teamId
+      } =
          req.params;
 
       const team =
+
          await Team.findById(
             teamId
          )
 
             .populate({
-               path: "group",
-               populate: {
-                  path: "round",
-               },
+
+               path:
+                  "group",
+
+               populate: [
+
+                  {
+                     path:
+                        "round",
+                  },
+
+               ],
+
             })
 
-            .populate("tournament")
-
-            .populate("currentRound")
-
-            .populate("eliminatedInRound")
+            .populate(
+               "tournament"
+            )
 
             .populate(
+               "currentRound"
+            )
+
+            .populate(
+               "eliminatedInRound"
+            )
+
+            .populate(
+
                "registeredBy",
+
                "email username"
+
             );
+
+      if (
+         !team
+      ) {
+
+         throw new ApiError(
+
+            404,
+
+            "Team not found"
+
+         );
+
+      }
+
+
 
       if (
 
@@ -366,19 +407,19 @@ const getTeamById = asyncHandler(
 
          &&
 
-         team
-
-         &&
-
          team.registeredBy
 
          &&
 
-         team.registeredBy._id.toString()
+         String(
+            team.registeredBy._id
+         )
 
          !==
 
-         req.user._id.toString()
+         String(
+            req.user._id
+         )
 
       ) {
 
@@ -392,26 +433,99 @@ const getTeamById = asyncHandler(
 
       }
 
-      if (!team) {
 
-         throw new ApiError(
-            404,
-            "Team not found"
-         );
+
+      /* SLOT */
+
+      let slot = null;
+
+      if (
+
+         team.group
+
+      ) {
+
+         const fullGroup =
+
+            await Group.findById(
+
+               team.group._id
+
+            )
+
+               .select(
+                  "teams"
+               )
+
+               .lean();
+
+         if (
+
+            fullGroup?.teams
+
+               ?.length
+
+         ) {
+
+            const idx =
+
+               fullGroup.teams.findIndex(
+
+                  id =>
+
+                     String(id)
+
+                     ===
+
+                     String(
+                        team._id
+                     )
+
+               );
+
+            slot =
+
+               idx >= 0
+
+                  ?
+
+                  idx + 4
+
+                  :
+
+                  null;
+
+         }
 
       }
 
-      return res.status(200).json(
+      team._doc.slot =
+         slot;
 
-         new ApiResponse(
-            200,
-            team,
-            "Team fetched successfully"
+
+
+      return res
+
+         .status(
+            200
          )
 
-      );
+         .json(
+
+            new ApiResponse(
+
+               200,
+
+               team,
+
+               "Team fetched successfully"
+
+            )
+
+         );
 
    }
+
 );
 
 const manualAssignTeam = asyncHandler(

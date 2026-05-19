@@ -193,70 +193,133 @@ export default function TeamPage() {
 
             {/* ACTIONS */}
 
-            <div className="mt-8 flex flex-col gap-3">
+            <div className="mt-8 grid grid-cols-2 gap-3">
 
                 <Link
 
-                    href={`/user/my-tournaments/${teamId}/team`}
+                    href={`/user/my-tournaments/${teamId}/current-match`}
 
-                    className="rounded-2xl border border-cyan-500/20 bg-cyan-500/10 px-5 py-5 transition hover:bg-cyan-500/15"
+                    className="rounded-3xl border border-red-500/20 bg-red-500/10 p-4 transition hover:bg-red-500/15 md:p-6"
 
                 >
 
-                    <h2 className="text-lg font-black text-cyan-400">
+                    <p className="text-[10px] tracking-[0.25em] text-red-400">
 
-                        MY TEAM
+                        PLAY NOW
+
+                    </p>
+
+                    <h2 className="mt-2 text-lg font-black text-red-400 md:text-2xl">
+
+                        CURRENT MATCH
 
                     </h2>
 
-                </Link>
-
-
-
-                <Link
-
-                    href={`/user/my-tournaments/${teamId}/current-round`}
-
-                    className="rounded-2xl border border-purple-500/20 bg-purple-500/10 px-5 py-5 transition hover:bg-purple-500/15"
-
-                >
-
-                    <h2 className="text-lg font-black text-purple-400">
+                    <p className="mt-2 text-xs text-gray-400">
 
                         {
 
                             team.currentRound?.name
 
-                            ||
+                                ?
 
-                            "CURRENT ROUND"
+                                `Round • ${team.currentRound.name}`
+
+                                :
+
+                                "Waiting"
 
                         }
 
-                    </h2>
+                    </p>
 
                 </Link>
 
-
-
                 <Link
 
-                    href={`/user/my-tournaments/${teamId}/history`}
+                    href={`/user/my-tournaments/${teamId}/matches`}
 
-                    className="rounded-2xl border border-yellow-500/20 bg-yellow-500/10 px-5 py-5 transition hover:bg-yellow-500/15"
+                    className="rounded-3xl border border-cyan-500/20 bg-cyan-500/10 p-4 transition hover:bg-cyan-500/15 md:p-6"
 
                 >
 
-                    <h2 className="text-lg font-black text-yellow-400">
+                    <p className="text-[10px] tracking-[0.25em] text-cyan-400">
 
-                        PREVIOUS ROUNDS
+                        BACKUP
+
+                    </p>
+
+                    <h2 className="mt-2 text-lg font-black text-cyan-400 md:text-2xl">
+
+                        ALL MATCHES
 
                     </h2>
+
+                    <p className="mt-2 text-xs text-gray-400">
+
+                        Room • Schedule
+
+                    </p>
+
+                </Link>
+
+                <Link
+
+                    href={`/user/my-tournaments/${teamId}/results`}
+
+                    className="rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-4 transition hover:bg-yellow-500/15 md:p-6"
+
+                >
+
+                    <p className="text-[10px] tracking-[0.25em] text-yellow-400">
+
+                        TOURNAMENT
+
+                    </p>
+
+                    <h2 className="mt-2 text-lg font-black text-yellow-400 md:text-2xl">
+
+                        RESULTS
+
+                    </h2>
+
+                    <p className="mt-2 text-xs text-gray-400">
+
+                        Leaderboard
+
+                    </p>
+
+                </Link>
+
+                <Link
+
+                    href={`/user/my-tournaments/${teamId}/team`}
+
+                    className="rounded-3xl border border-purple-500/20 bg-purple-500/10 p-4 transition hover:bg-purple-500/15 md:p-6"
+
+                >
+
+                    <p className="text-[10px] tracking-[0.25em] text-purple-400">
+
+                        TEAM
+
+                    </p>
+
+                    <h2 className="mt-2 text-lg font-black text-purple-400 md:text-2xl">
+
+                        MY TEAM
+
+                    </h2>
+
+                    <p className="mt-2 text-xs text-gray-400">
+
+                        Players • Slot
+
+                    </p>
 
                 </Link>
 
             </div>
-
         </div>
 
     );
