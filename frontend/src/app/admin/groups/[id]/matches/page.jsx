@@ -774,11 +774,23 @@ export default function GroupMatchesPage() {
 
                                              startTime:
                                                 match.startTime
-                                                   ? new Date(
-                                                      match.startTime
-                                                   )
-                                                      .toISOString()
-                                                      .slice(11, 16)
+                                                   ? (() => {
+                                                      const date = new Date(
+                                                         match.startTime
+                                                      );
+
+                                                      const hours =
+                                                         String(
+                                                            date.getHours()
+                                                         ).padStart(2, "0");
+
+                                                      const minutes =
+                                                         String(
+                                                            date.getMinutes()
+                                                         ).padStart(2, "0");
+
+                                                      return `${hours}:${minutes}`;
+                                                   })()
                                                    : "",
 
                                           });

@@ -15,9 +15,9 @@ import { verifyAdmin }
    from "../middlewares/admin.middleware.js";
 
 import {
-verifyModerator,
+   verifyModerator,
 }
-from "../middlewares/moderator.middleware.js";
+   from "../middlewares/moderator.middleware.js";
 
 const router = express.Router();
 
@@ -52,7 +52,7 @@ router.patch(
 router.get(
    "/next/:id",
    verifyJWT,
-   verifyAdmin,
+   verifyModerator,
    getNextRound
 );
 

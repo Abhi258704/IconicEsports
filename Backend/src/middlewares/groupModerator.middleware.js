@@ -5,153 +5,216 @@ import Match from "../models/match.model.js";
 import {
    ApiError,
 }
-from "../utils/ApiError.js";
+   from "../utils/ApiError.js";
 
 const verifyGroupModerator =
-async (
-req,
-res,
-next
-) => {
+   async (
+      req,
+      res,
+      next
+   ) => {
 
-try {
+      try {
 
-   // admin bypass
+         /* ADMIN */
 
-   if (
-      req.user.role ===
-      "admin"
-   ) {
+         if (
+            req.user.role ===
+            "admin"
+         ) {
 
-      return next();
+            return next();
 
-   }
+         }
 
-   // moderator only
+         /* MODERATOR */
 
-   if (
-      req.user.role !==
-      "moderator"
-   ) {
+         if (
+            req.user.role !==
+            "moderator"
+         ) {
 
-      throw new ApiError(
-         403,
-         "Access denied"
-      );
+            throw new ApiError(
+               403,
+               "Access denied"
+            );
 
-   }
+         }
 
-   // safer extraction
+         /*
+         GROUP ROUTES
+         /groups/:id
+         
+         MATCH ROUTES
+         /matches/:id
+         /matches/group/:id
+         */
 
-   let groupId =
+         let groupId =
 
-      req.body?.groupId ||
+            req.body?.groupId ||
 
-      req.body?.currentGroupId ||
+            req.body?.currentGroupId;
 
-      req.params?.id;
+         /* MATCH ROUTES */
 
-   // match routes
+         if (
 
-   if (
-      !groupId &&
+            !groupId &&
 
-      req.originalUrl.includes(
-         "/matches/"
-      )
-   ) {
+            req.originalUrl.includes(
+               "/matches/"
+            )
 
-      const match =
+         ) {
 
-         await Match.findById(
-            req.params.id
-         );
+            /* GROUP MATCHES */
 
-      if (
-         !match
+            if (
+
+               req.originalUrl.includes(
+                  "/matches/group/"
+               )
+
+            ) {
+
+               groupId =
+                  req.params.id;
+
+            }
+
+            /* SINGLE MATCH */
+
+            else {
+
+               const match =
+
+                  await Match
+                     .findById(
+                        req.params.id
+                     )
+                     .select(
+                        "group"
+                     );
+
+               if (
+                  !match
+               ) {
+
+                  throw new ApiError(
+                     404,
+                     "Match not found"
+                  );
+
+               }
+
+               groupId =
+                  match.group;
+
+            }
+
+         }
+
+         /* GROUP ROUTES */
+
+         if (
+
+            !groupId &&
+
+            req.originalUrl.includes(
+               "/groups/"
+            )
+
+         ) {
+
+            groupId =
+               req.params.id;
+
+         }
+
+         /* FINAL CHECK */
+
+         if (
+            !groupId
+         ) {
+
+            throw new ApiError(
+               400,
+               "Group ID required"
+            );
+
+         }
+
+         /* FIND GROUP */
+
+         const group =
+
+            await Group
+               .findById(
+                  groupId
+               )
+               .select(
+                  "moderators"
+               );
+
+         if (
+            !group
+         ) {
+
+            throw new ApiError(
+               404,
+               "Group not found"
+            );
+
+         }
+
+         /* VERIFY */
+
+         const assigned =
+
+            group
+               .moderators
+               ?.some(
+
+                  moderatorId =>
+
+                     moderatorId
+                        .toString() ===
+
+                     req.user._id
+                        .toString()
+
+               );
+
+         if (
+            !assigned
+         ) {
+
+            throw new ApiError(
+               403,
+               "Not assigned to this group"
+            );
+
+         }
+
+         next();
+
+      }
+
+      catch (
+      error
       ) {
 
-         throw new ApiError(
-            404,
-            "Match not found"
+         next(
+            error
          );
 
       }
 
-      groupId =
-         match.group;
-
-   }
-
-   if (
-      !groupId
-   ) {
-
-      throw new ApiError(
-         400,
-         "Group ID required"
-      );
-
-   }
-
-   const group =
-
-      await Group.findById(
-         groupId
-      );
-
-   if (
-      !group
-   ) {
-
-      throw new ApiError(
-         404,
-         "Group not found"
-      );
-
-   }
-
-   const assigned =
-
-      group
-         .moderators
-         ?.some(
-            id =>
-
-               id.toString() ===
-
-               req.user._id.toString()
-         );
-
-   if (
-      !assigned
-   ) {
-
-      throw new ApiError(
-         403,
-         "Not assigned to this group"
-      );
-
-   }
-
-   next();
-
-}
-
-catch (
-error
-) {
-
-   next(
-      error
-   );
-
-}
-
-};
+   };
 
 export {
 
-verifyGroupModerator,
+   verifyGroupModerator,
 
 };
