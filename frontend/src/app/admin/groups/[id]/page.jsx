@@ -294,9 +294,26 @@ export default function GroupPage() {
                                     </Link>
 
                                     <button
+                                        disabled={
+                                            group?.qualificationLocked
+                                        }
                                         onClick={() => {
 
-                                            if (selectionMode) {
+                                            if (
+                                                group?.qualificationLocked
+                                            ) {
+
+                                                toast.error(
+                                                    "Qualification locked"
+                                                );
+
+                                                return;
+
+                                            }
+
+                                            if (
+                                                selectionMode
+                                            ) {
 
                                                 setSelectedTeams([]);
 
@@ -309,9 +326,26 @@ export default function GroupPage() {
                                             );
 
                                         }}
-                                        className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition hover:scale-105 ${selectionMode
-                                            ? "bg-gradient-to-r from-red-500 to-pink-500"
-                                            : "bg-gradient-to-r from-purple-500 to-cyan-500"
+                                        className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition
+
+                                                ${group?.qualificationLocked
+
+                                                ?
+
+                                                "cursor-not-allowed opacity-50 bg-green-500/20"
+
+                                                :
+
+                                                selectionMode
+
+                                                    ?
+
+                                                    "bg-gradient-to-r from-red-500 to-pink-500"
+
+                                                    :
+
+                                                    "bg-gradient-to-r from-purple-500 to-cyan-500"
+
                                             }`}
                                     >
 
@@ -565,21 +599,29 @@ export default function GroupPage() {
                                                     allGroups
                                                         .filter(
                                                             (g) =>
+
                                                                 g._id !==
                                                                 group._id
+
+                                                                &&
+
+                                                                !g.qualificationLocked
                                                         )
-                                                        .map((g) => (
 
-                                                            <option
-                                                                key={g._id}
-                                                                value={g._id}
-                                                            >
+                                                        .map(
+                                                            (g) => (
 
-                                                                {g.name}
+                                                                <option
+                                                                    key={g._id}
+                                                                    value={g._id}
+                                                                >
 
-                                                            </option>
+                                                                    {g.name}
 
-                                                        ))
+                                                                </option>
+
+                                                            )
+                                                        )
                                                 }
 
                                             </select>

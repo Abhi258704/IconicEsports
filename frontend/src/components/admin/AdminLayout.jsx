@@ -92,7 +92,7 @@ export default function AdminLayout({
                   Tournaments
                </Link>
 
-               <Link
+               {/* <Link
                   href="/admin/teams"
                   className={navClass}
                >
@@ -112,7 +112,7 @@ export default function AdminLayout({
                      className={iconClass}
                   />
                   Rounds
-               </Link>
+               </Link> */}
 
                {/* <Link
                   href="/admin/groups"
