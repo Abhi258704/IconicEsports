@@ -31,8 +31,7 @@ export default function ProtectedRoute({
                     return;
                 }
 
-                const res = await API.get("/users/me");
-
+                const res = await API.get("/api/v1/users/me");
                 const user = res.data.data;
 
                 // ADMIN CHECK
