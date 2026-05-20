@@ -799,6 +799,165 @@ status
 
       }
    );
+
+const getResultsHistory =
+   asyncHandler(
+
+      async (
+         req,
+         res
+      ) => {
+
+         const {
+            teamId
+         } =
+            req.params;
+
+         const team =
+
+            await Team.findOne({
+
+               _id:
+                  teamId,
+
+               registeredBy:
+                  req.user._id,
+
+            });
+
+         if (
+            !team
+         ) {
+
+            throw new ApiError(
+               404,
+               "Team not found"
+            );
+
+         }
+
+         const matches =
+
+            await Match.find({
+
+               "results.team":
+                  team._id,
+
+               status:
+                  "completed",
+
+            })
+
+               .populate(
+                  "group",
+                  "name round"
+               )
+
+               .populate(
+                  {
+                     path:
+                        "round",
+
+                     select:
+                        "name roundNumber",
+                  }
+
+               )
+
+               .select(
+
+                  `
+matchNumber
+group
+round
+status
+`
+
+               )
+
+               .sort({
+
+                  createdAt:
+                     1,
+
+               });
+
+         const grouped =
+            new Map();
+
+         matches.forEach(
+
+            match => {
+
+               const key =
+
+                  `${match.round?._id}-${match.group?._id}`;
+
+               if (
+
+                  !grouped.has(
+                     key
+                  )
+
+               ) {
+
+                  grouped.set(
+
+                     key,
+
+                     {
+
+                        round:
+                           match.round,
+
+                        group:
+                           match.group,
+
+                        matchCount:
+                           0,
+
+                     },
+
+                  );
+
+               }
+
+               grouped.get(
+                  key
+               )
+                  .matchCount++;
+
+            }
+
+         );
+
+         return res
+
+            .status(
+               200
+            )
+
+            .json(
+
+               new ApiResponse(
+
+                  200,
+
+                  [
+
+                     ...grouped.values()
+
+                  ],
+
+                  "Results history"
+
+               )
+
+            );
+
+      }
+
+   );
 // const getMyTeamMatches = asyncHandler(
 //    async (req, res) => {
 
@@ -885,4 +1044,6 @@ export {
    getCurrentMatch,
 
    getAllMatches,
+
+   getResultsHistory,
 };

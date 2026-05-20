@@ -2,6 +2,9 @@ import Match from "../models/match.model.js";
 
 import Group from "../models/group.model.js";
 
+import Team
+   from "../models/team.model.js";
+
 import { asyncHandler }
    from "../utils/asyncHandler.js";
 
@@ -150,6 +153,107 @@ const getSingleMatch = asyncHandler(
    }
 );
 
+const getPublicSingleMatch =
+   asyncHandler(
+
+      async (
+         req,
+         res
+      ) => {
+
+         const {
+            id
+         } =
+            req.params;
+
+         const match =
+
+            await Match.findById(
+               id
+            )
+
+               .populate(
+
+                  "results.team",
+
+                  "teamName"
+
+               )
+
+               .select(
+
+                  `
+matchNumber
+map
+scheduledAt
+startTime
+roomId
+roomPassword
+results
+status
+`
+
+               )
+
+               .lean();
+
+         if (
+
+            !match
+
+         ) {
+
+            throw new ApiError(
+
+               404,
+
+               "Match not found"
+
+            );
+
+         }
+
+         if (
+
+            match.status !==
+            "completed"
+
+         ) {
+
+            throw new ApiError(
+
+               403,
+
+               "Results unavailable"
+
+            );
+
+         }
+
+         return res
+
+            .status(
+               200
+            )
+
+            .json(
+
+               new ApiResponse(
+
+                  200,
+
+                  match,
+
+                  "Match result fetched"
+
+               )
+
+            );
+
+      }
+
+   );
+
 const updateMatchRoom = asyncHandler(
    async (req, res) => {
 
@@ -262,6 +366,73 @@ const updateMatch = asyncHandler(
    }
 );
 
+const getPublicGroupMatches =
+   asyncHandler(
+
+      async (
+         req,
+         res
+      ) => {
+
+         const {
+            id
+         } =
+            req.params;
+
+         const matches =
+
+            await Match.find({
+
+               group:
+                  id,
+
+               status:
+                  "completed",
+
+            })
+
+               .select(
+
+                  `
+matchNumber
+map
+status
+results
+`
+
+               )
+
+               .sort({
+
+                  matchNumber:
+                     1,
+
+               });
+
+         return res
+
+            .status(
+               200
+            )
+
+            .json(
+
+               new ApiResponse(
+
+                  200,
+
+                  matches,
+
+                  "Results fetched"
+
+               )
+
+            );
+
+      }
+
+   );
+
 
 
 
@@ -273,6 +444,8 @@ export {
    getGroupMatches,
    updateMatchResults,
    getSingleMatch,
+   getPublicSingleMatch,
    updateMatchRoom,
    updateMatch,
+   getPublicGroupMatches,
 };

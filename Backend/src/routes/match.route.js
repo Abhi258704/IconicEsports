@@ -5,8 +5,10 @@ import {
    getGroupMatches,
    updateMatchResults,
    getSingleMatch,
+   getPublicSingleMatch,
    updateMatchRoom,
    updateMatch,
+   getPublicGroupMatches,
 } from "../controllers/match.controller.js";
 
 import { verifyJWT }
@@ -38,6 +40,12 @@ router.post(
 );
 
 router.get(
+   "/public/group/:id",
+   verifyJWT,
+   getPublicGroupMatches
+);
+
+router.get(
    "/group/:id",
    verifyJWT,
    verifyGroupModerator,
@@ -50,6 +58,12 @@ router.patch(
    verifyGroupModerator,
    validate(updateMatchResultsSchema),
    updateMatchResults
+);
+
+router.get(
+   "/public/:id",
+   verifyJWT,
+   getPublicSingleMatch
 );
 
 router.get(

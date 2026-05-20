@@ -1,8 +1,9 @@
 import UserLayout
-from "@/components/user/UserLayout";
+   from "@/components/user/UserLayout";
 
 import UserProtectedRoute
-from "@/components/user/UserProtectedRoute";
+   from "@/components/user/UserProtectedRoute";
+
 
 export default function Layout({
    children,
@@ -12,11 +13,13 @@ export default function Layout({
 
       <UserProtectedRoute>
 
-         <UserLayout>
 
-            {children}
+            <UserLayout>
 
-         </UserLayout>
+               {children}
+
+            </UserLayout>
+
 
       </UserProtectedRoute>
 

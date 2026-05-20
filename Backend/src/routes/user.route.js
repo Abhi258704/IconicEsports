@@ -29,6 +29,8 @@ import {
 
     getAllMatches,
 
+    getResultsHistory,
+
 }
     from "../controllers/user.controller.js";
 
@@ -70,6 +72,12 @@ router.get(
     "/my-teams/:teamId/current-match",
     verifyJWT,
     getCurrentMatch
+);
+
+router.get(
+    "/my-teams/:teamId/results",
+    verifyJWT,
+    getResultsHistory
 );
 
 router.get(

@@ -8,6 +8,9 @@ import {
 
 import Link from "next/link";
 
+import toast
+   from "react-hot-toast";
+
 import {
    ArrowLeft,
    Users,
@@ -61,7 +64,7 @@ export default function TournamentTeamsPage({
    const fetchTeams =
       async () => {
 
-          if (!id) return;
+         if (!id) return;
 
          try {
 
@@ -104,13 +107,230 @@ export default function TournamentTeamsPage({
 
    }
 
+   const exportTeams =
+      async () => {
+
+         try {
+
+            const res =
+
+               await API.get(
+
+                  `/tournaments/${id}/export-teams`,
+
+                  {
+
+                     responseType:
+                        "blob",
+
+                  }
+
+               );
+
+            const url =
+
+               window.URL
+                  .createObjectURL(
+
+                     new Blob([
+                        res.data
+                     ])
+
+                  );
+
+            const a =
+
+               document.createElement(
+                  "a"
+               );
+
+            a.href =
+               url;
+
+            a.download =
+               "teams.xlsx";
+
+            document.body
+               .appendChild(
+                  a
+               );
+
+            a.click();
+
+            a.remove();
+
+            window.URL
+               .revokeObjectURL(
+                  url
+               );
+
+         }
+
+         catch (
+         err
+         ) {
+
+            console.log(
+               err
+            );
+
+            alert(
+               "Export failed"
+            );
+
+         }
+
+      };
+
+   const exportGroups =
+      async () => {
+
+         try {
+
+            const res =
+
+               await API.get(
+
+                  `/tournaments/${id}/export-groups`,
+
+                  {
+
+                     responseType:
+                        "blob",
+
+                  }
+
+               );
+
+            const url =
+
+               window.URL.createObjectURL(
+
+                  new Blob([
+                     res.data
+                  ])
+
+               );
+
+            const a =
+
+               document.createElement(
+                  "a"
+               );
+
+            a.href =
+               url;
+
+            a.download =
+               "groups.xlsx";
+
+            document.body.appendChild(
+               a
+            );
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(
+               url
+            );
+
+         }
+
+         catch {
+
+            toast.error(
+               "Export failed"
+            );
+
+         }
+
+      };
+
+   const exportMatches =
+      async () => {
+
+         try {
+
+            const res =
+
+               await API.get(
+
+                  `/tournaments/${id}/export-matches`,
+
+                  {
+
+                     responseType:
+                        "blob",
+
+                  }
+
+               );
+
+            const url =
+
+               window.URL.createObjectURL(
+
+                  new Blob([
+                     res.data
+                  ])
+
+               );
+
+            const a =
+
+               document.createElement(
+                  "a"
+               );
+
+            a.href =
+               url;
+
+            a.download =
+               "matches.xlsx";
+
+            document.body.appendChild(
+               a
+            );
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(
+               url
+            );
+
+            toast.success(
+               "Export ready"
+            );
+
+         }
+
+         catch (
+         err
+         ) {
+
+            console.log(
+               err
+            );
+
+            toast.error(
+               "Export failed"
+            );
+
+         }
+
+      };
+
    return (
 
       <div className="flex h-[calc(100vh-64px)] flex-col overflow-hidden">
 
          {/* HEADER */}
 
-         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+         <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
 
             <div>
 
@@ -126,12 +346,47 @@ export default function TournamentTeamsPage({
                </Link>
 
                <p className="mt-6 uppercase tracking-[0.3em] text-sm text-cyan-400">
+
                   Tournament Teams
+
                </p>
 
                <h1 className="mt-3 text-5xl font-black bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-400 bg-clip-text text-transparent">
+
                   All Teams
+
                </h1>
+
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+
+               <button
+                  onClick={exportTeams}
+                  className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 px-6 py-4 font-black text-white"
+               >
+
+                  Export Teams
+
+               </button>
+
+               <button
+                  onClick={exportGroups}
+                  className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 px-6 py-4 font-black text-white"
+               >
+
+                  Export Groups
+
+               </button>
+
+               <button
+                  onClick={exportMatches}
+                  className="rounded-2xl bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-4 font-black text-white"
+               >
+
+                  Export Matches
+
+               </button>
 
             </div>
 

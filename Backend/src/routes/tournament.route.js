@@ -7,6 +7,9 @@ import {
     deleteTournament,
     updateTournament,
     getTournamentTeamsData,
+    exportTournamentTeams,
+    exportTournamentGroups,
+    exportTournamentMatches,
 } from "../controllers/tournament.controller.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -42,6 +45,27 @@ router.get(
     verifyJWT,
     verifyAdmin,
     getTournamentTeamsData
+);
+
+router.get(
+    "/:id/export-teams",
+    verifyJWT,
+    verifyAdmin,
+    exportTournamentTeams
+);
+
+router.get(
+    "/:id/export-groups",
+    verifyJWT,
+    verifyAdmin,
+    exportTournamentGroups
+);
+
+router.get(
+    "/:id/export-matches",
+    verifyJWT,
+    verifyAdmin,
+    exportTournamentMatches
 );
 
 router.route("/:id")
