@@ -64,7 +64,7 @@ export default function Home() {
                const res =
                   await API.get(
 
-                     "/api/v1/users/me",
+                     "/users/me",
 
                      {
 
@@ -158,7 +158,7 @@ export default function Home() {
             const res =
                await API.post(
 
-                  "/api/v1/auth/google",
+                  "/auth/google",
 
                   {
 
@@ -181,7 +181,7 @@ export default function Home() {
             const me =
                await API.get(
 
-                  "/api/v1/users/me",
+                  "/users/me",
 
                   {
 

@@ -47,7 +47,9 @@ export default function UserProtectedRoute({
                }
 
                const res =
-                  await API.get("/api/v1/users/me");
+                  await API.get(
+                     "/users/me"
+                  );
 
                const user =
                   res.data.data;
