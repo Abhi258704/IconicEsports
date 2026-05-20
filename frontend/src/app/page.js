@@ -1,23 +1,20 @@
 "use client";
 
-import axios from "axios";
+import API from "@/lib/axios";
 
 import {
    GoogleLogin,
-}
-   from "@react-oauth/google";
+} from "@react-oauth/google";
 
 import {
    useRouter,
-}
-   from "next/navigation";
+} from "next/navigation";
 
 import {
    useEffect,
    useState,
    useRef,
-}
-   from "react";
+} from "react";
 
 export default function Home() {
 
@@ -48,14 +45,11 @@ export default function Home() {
          async () => {
 
             const token =
-
                localStorage.getItem(
                   "token"
                );
 
-            if (
-               !token
-            ) {
+            if (!token) {
 
                setShowLogin(
                   true
@@ -68,17 +62,15 @@ export default function Home() {
             try {
 
                const res =
+                  await API.get(
 
-                  await axios.get(
-
-                     "http://localhost:8000/api/v1/users/me",
+                     "/api/v1/users/me",
 
                      {
 
                         headers: {
 
                            Authorization:
-
                               `Bearer ${token}`,
 
                         },
@@ -101,10 +93,8 @@ export default function Home() {
                );
 
                if (
-
                   user.role ===
                   "admin"
-
                ) {
 
                   router.replace(
@@ -114,10 +104,8 @@ export default function Home() {
                }
 
                else if (
-
                   user.role ===
                   "moderator"
-
                ) {
 
                   router.replace(
@@ -156,7 +144,9 @@ export default function Home() {
 
       checkUser();
 
-   }, []);
+   }, [router]);
+
+
 
    const handleSuccess =
       async (
@@ -166,15 +156,13 @@ export default function Home() {
          try {
 
             const res =
+               await API.post(
 
-               await axios.post(
-
-                  "http://localhost:8000/api/v1/auth/google",
+                  "/api/v1/auth/google",
 
                   {
 
                      credential:
-
                         credentialResponse
                            .credential,
 
@@ -182,27 +170,25 @@ export default function Home() {
 
                );
 
+            const token =
+               res.data.data.token;
+
             localStorage.setItem(
-
                "token",
-
-               res.data.data.token
-
+               token
             );
 
             const me =
+               await API.get(
 
-               await axios.get(
-
-                  "http://localhost:8000/api/v1/users/me",
+                  "/api/v1/users/me",
 
                   {
 
                      headers: {
 
                         Authorization:
-
-                           `Bearer ${res.data.data.token}`,
+                           `Bearer ${token}`,
 
                      },
 
@@ -260,12 +246,15 @@ export default function Home() {
          ) {
 
             console.log(
+               "LOGIN ERROR:",
                error
             );
 
          }
 
       };
+
+
 
    if (
       !showLogin
