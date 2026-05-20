@@ -143,43 +143,131 @@ export default function TeamPage() {
 
                     </div>
 
-                    <div>
+                    <div className="flex w-full justify-start lg:w-auto lg:justify-end">
 
-                        <div
+                        <div className="flex w-full items-stretch gap-3 lg:w-auto">
 
-                            className={`inline-flex rounded-2xl px-5 py-3 text-sm font-bold
+                            <div
 
-                                    ${team.status === "verified"
+                                className={`flex min-h-[78px] min-w-[130px] items-center justify-center rounded-2xl px-5 text-center text-sm font-black
 
-                                    ?
-
-                                    "bg-green-500/20 text-green-400"
-
-                                    :
-
-                                    team.status === "rejected"
+${team.isEliminated
 
                                         ?
 
-                                        "bg-red-500/20 text-red-400"
+                                        "border border-red-500/20 bg-red-500/10 text-red-400"
 
                                         :
 
-                                        "bg-yellow-500/20 text-yellow-400"
+                                        team.status === "verified"
 
-                                }
+                                            ?
+
+                                            "bg-green-500/20 text-green-400"
+
+                                            :
+
+                                            team.status === "rejected"
+
+                                                ?
+
+                                                "bg-red-500/20 text-red-400"
+
+                                                :
+
+                                                "bg-yellow-500/20 text-yellow-400"
+
+                                    }
 
 `}
 
-                        >
+                            >
 
-                            {
+                                {
 
-                                team.status
+                                    team.isEliminated
 
-                                    .toUpperCase()
+                                        ?
 
-                            }
+                                        "ELIMINATED"
+
+                                        :
+
+                                        team.status.toUpperCase()
+
+                                }
+
+                            </div>
+
+                            <div className="flex-1 rounded-2xl bg-white/[0.04] px-5 py-4">
+
+                                <p className="text-[10px] uppercase tracking-[0.25em] text-gray-500">
+
+                                    Current Round
+
+                                </p>
+
+                                <p className="mt-1 font-black">
+
+                                    {
+
+                                        team.currentRound?.name
+
+                                        ||
+
+                                        (
+
+                                            team.isEliminated
+
+                                                ?
+
+                                                "Tournament Ended"
+
+                                                :
+
+                                                "Not Assigned"
+
+                                        )
+
+                                    }
+
+                                </p>
+
+                                {
+
+                                    team.isEliminated
+
+                                    &&
+
+                                    <>
+
+                                        <div className="my-3 h-px bg-red-500/10" />
+
+                                        <p className="text-[10px] uppercase tracking-[0.25em] text-red-300">
+
+                                            Eliminated In
+
+                                        </p>
+
+                                        <p className="mt-1 font-black text-red-400">
+
+                                            {
+
+                                                team.eliminatedInRound?.name
+
+                                                ||
+
+                                                "Unknown Round"
+
+                                            }
+
+                                        </p>
+
+                                    </>
+
+                                }
+
+                            </div>
 
                         </div>
 

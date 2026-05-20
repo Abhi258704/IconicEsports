@@ -141,38 +141,93 @@ export default function TeamPage() {
 
                     </div>
 
-                    <div
+                    <div className="flex flex-col items-end gap-3">
 
-                        className={`rounded-2xl px-5 py-3 text-sm font-bold
+                        <div
 
-${team.status === "verified"
+                            className={`rounded-2xl px-5 py-3 text-sm font-black
 
-                                ?
-
-                                "bg-green-500/20 text-green-400"
-
-                                :
-
-                                team.status === "rejected"
+${team.isEliminated
 
                                     ?
 
-                                    "bg-red-500/20 text-red-400"
+                                    "bg-red-500/20 text-red-400 border border-red-500/20"
 
                                     :
 
-                                    "bg-yellow-500/20 text-yellow-400"
+                                    team.status === "verified"
 
-                            }
+                                        ?
+
+                                        "bg-green-500/20 text-green-400"
+
+                                        :
+
+                                        team.status === "rejected"
+
+                                            ?
+
+                                            "bg-red-500/20 text-red-400"
+
+                                            :
+
+                                            "bg-yellow-500/20 text-yellow-400"
+
+                                }
 
 `}
 
-                    >
+                        >
+
+                            {
+
+                                team.isEliminated
+
+                                    ?
+
+                                    "ELIMINATED"
+
+                                    :
+
+                                    team.status.toUpperCase()
+
+                            }
+
+                        </div>
 
                         {
 
-                            team.status
-                                .toUpperCase()
+                            team.isEliminated
+
+                            &&
+
+                            (
+
+                                <div className="rounded-2xl bg-red-500/10 px-4 py-3 text-right">
+
+                                    <p className="text-xs uppercase tracking-[0.2em] text-red-300">
+
+                                        Eliminated In
+
+                                    </p>
+
+                                    <p className="mt-1 font-black text-red-400">
+
+                                        {
+
+                                            team.eliminatedInRound?.name
+
+                                            ||
+
+                                            "Unknown Round"
+
+                                        }
+
+                                    </p>
+
+                                </div>
+
+                            )
 
                         }
 

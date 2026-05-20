@@ -15,6 +15,7 @@ import {
 import {
    useEffect,
    useState,
+   useRef,
 }
    from "react";
 
@@ -29,12 +30,25 @@ export default function Home() {
    ] =
       useState(false);
 
+   const initialized =
+      useRef(false);
+
    useEffect(() => {
+
+      if (
+         initialized.current
+      ) {
+         return;
+      }
+
+      initialized.current =
+         true;
 
       const checkUser =
          async () => {
 
             const token =
+
                localStorage.getItem(
                   "token"
                );
@@ -54,6 +68,7 @@ export default function Home() {
             try {
 
                const res =
+
                   await axios.get(
 
                      "http://localhost:8000/api/v1/users/me",
@@ -64,9 +79,9 @@ export default function Home() {
 
                            Authorization:
 
-                              `Bearer ${token}`
+                              `Bearer ${token}`,
 
-                        }
+                        },
 
                      }
 
@@ -74,8 +89,6 @@ export default function Home() {
 
                const user =
                   res.data.data;
-
-               /* sync local */
 
                localStorage.setItem(
 
@@ -88,8 +101,10 @@ export default function Home() {
                );
 
                if (
+
                   user.role ===
                   "admin"
+
                ) {
 
                   router.replace(
@@ -99,8 +114,10 @@ export default function Home() {
                }
 
                else if (
+
                   user.role ===
                   "moderator"
+
                ) {
 
                   router.replace(
@@ -139,9 +156,7 @@ export default function Home() {
 
       checkUser();
 
-   }, [
-      router
-   ]);
+   }, []);
 
    const handleSuccess =
       async (
@@ -151,6 +166,7 @@ export default function Home() {
          try {
 
             const res =
+
                await axios.post(
 
                   "http://localhost:8000/api/v1/auth/google",
@@ -160,7 +176,7 @@ export default function Home() {
                      credential:
 
                         credentialResponse
-                           .credential
+                           .credential,
 
                   }
 
@@ -174,9 +190,8 @@ export default function Home() {
 
             );
 
-            /* fetch fresh role */
-
             const me =
+
                await axios.get(
 
                   "http://localhost:8000/api/v1/users/me",
@@ -187,9 +202,9 @@ export default function Home() {
 
                         Authorization:
 
-                           `Bearer ${res.data.data.token}`
+                           `Bearer ${res.data.data.token}`,
 
-                     }
+                     },
 
                   }
 
@@ -213,7 +228,7 @@ export default function Home() {
                "admin"
             ) {
 
-               router.push(
+               router.replace(
                   "/admin"
                );
 
@@ -224,7 +239,7 @@ export default function Home() {
                "moderator"
             ) {
 
-               router.push(
+               router.replace(
                   "/moderator"
                );
 
@@ -232,7 +247,7 @@ export default function Home() {
 
             else {
 
-               router.push(
+               router.replace(
                   "/user"
                );
 
@@ -265,6 +280,8 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
 
          <GoogleLogin
+
+            key="single-google"
 
             onSuccess={
                handleSuccess

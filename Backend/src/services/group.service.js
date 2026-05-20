@@ -9,15 +9,15 @@ import Match from "../models/match.model.js";
 import User from "../models/user.model.js";
 
 import Tournament
-from "../models/tournament.model.js";
+   from "../models/tournament.model.js";
 
 import { ApiError }
-from "../utils/ApiError.js";
+   from "../utils/ApiError.js";
 
 import {
    withTransaction,
 }
-from "../utils/withTransaction.js";
+   from "../utils/withTransaction.js";
 
 
 const generateGroupsService =
@@ -283,6 +283,59 @@ const moveTeamsToGroupService =
                throw new ApiError(
                   404,
                   "Group not found"
+               );
+
+            }
+
+            const hasIdp =
+
+               await Match.exists({
+
+                  group:
+                     fromGroupId,
+
+                  $or: [
+
+                     {
+
+                        roomId: {
+
+                           $exists: true,
+
+                           $ne: "",
+
+                        },
+
+                     },
+
+                     {
+
+                        roomPassword: {
+
+                           $exists: true,
+
+                           $ne: "",
+
+                        },
+
+                     },
+
+                  ],
+
+               }).session(
+                  session
+               );
+
+            if (
+               hasIdp
+            ) {
+
+               throw new ApiError(
+
+                  400,
+
+                  "Cannot move teams after IDP release"
+
                );
 
             }
@@ -686,7 +739,7 @@ const rollbackQualificationService =
 
    };
 
-   const assignModeratorToGroupService =
+const assignModeratorToGroupService =
    async ({
       groupId,
       moderatorId,

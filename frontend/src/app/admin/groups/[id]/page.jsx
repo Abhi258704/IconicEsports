@@ -166,6 +166,18 @@ export default function GroupPage() {
 
                 console.log(error);
 
+                toast.error(
+
+                    error?.response
+                        ?.data
+                        ?.message
+
+                    ||
+
+                    "Failed to move teams"
+
+                );
+
             } finally {
 
                 setMoving(false);
@@ -201,6 +213,20 @@ export default function GroupPage() {
         );
 
     }
+
+    const moveLocked =
+
+        group?.matches?.some(
+
+            match =>
+
+                match.roomId
+
+                ||
+
+                match.roomPassword
+
+        );
 
     return (
 
@@ -294,22 +320,18 @@ export default function GroupPage() {
                                     </Link>
 
                                     <button
+
                                         disabled={
+
                                             group?.qualificationLocked
+
+                                            ||
+
+                                            moveLocked
+
                                         }
+
                                         onClick={() => {
-
-                                            if (
-                                                group?.qualificationLocked
-                                            ) {
-
-                                                toast.error(
-                                                    "Qualification locked"
-                                                );
-
-                                                return;
-
-                                            }
 
                                             if (
                                                 selectionMode
@@ -326,13 +348,22 @@ export default function GroupPage() {
                                             );
 
                                         }}
+
                                         className={`inline-flex items-center gap-2 rounded-2xl px-6 py-4 font-bold text-white transition
 
-                                                ${group?.qualificationLocked
+${(
+
+                                                group?.qualificationLocked
+
+                                                ||
+
+                                                moveLocked
+
+                                            )
 
                                                 ?
 
-                                                "cursor-not-allowed opacity-50 bg-green-500/20"
+                                                "cursor-not-allowed opacity-40 grayscale bg-white/10"
 
                                                 :
 
@@ -347,12 +378,29 @@ export default function GroupPage() {
                                                     "bg-gradient-to-r from-purple-500 to-cyan-500"
 
                                             }`}
+
                                     >
 
                                         {
+
                                             selectionMode
-                                                ? "Cancel Move"
-                                                : "Move Teams"
+
+                                                ?
+
+                                                "Cancel Move"
+
+                                                :
+
+                                                moveLocked
+
+                                                    ?
+
+                                                    "IDP RELEASED"
+
+                                                    :
+
+                                                    "Move Teams"
+
                                         }
 
                                     </button>
@@ -598,14 +646,40 @@ export default function GroupPage() {
                                                 {
                                                     allGroups
                                                         .filter(
-                                                            (g) =>
 
-                                                                g._id !==
-                                                                group._id
+                                                            (g) => {
 
-                                                                &&
+                                                                const groupLocked =
 
-                                                                !g.qualificationLocked
+                                                                    g.matches?.some(
+
+                                                                        match =>
+
+                                                                            match.roomId
+
+                                                                            ||
+
+                                                                            match.roomPassword
+
+                                                                    );
+
+                                                                return (
+
+                                                                    g._id !==
+                                                                    group._id
+
+                                                                    &&
+
+                                                                    !g.qualificationLocked
+
+                                                                    &&
+
+                                                                    !groupLocked
+
+                                                                );
+
+                                                            }
+
                                                         )
 
                                                         .map(
