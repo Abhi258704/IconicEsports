@@ -422,7 +422,14 @@ const getCurrentMatch =
             registeredBy:
                req.user._id,
 
-         });
+         })
+
+            .select(`
+_id
+group
+`)
+
+            .lean();
 
       if (
          !team
@@ -492,7 +499,9 @@ const getCurrentMatch =
                scheduledAt:
                   -1,
 
-            });
+            })
+
+            .lean();
 
       if (
 
@@ -521,7 +530,9 @@ const getCurrentMatch =
                   scheduledAt:
                      -1,
 
-               });
+               })
+
+               .lean();
 
       }
 
@@ -529,73 +540,59 @@ const getCurrentMatch =
          match
       ) {
 
-         const fullTeam =
-
-            await Team.findById(
-               teamId
-            );
-
          let slot =
             null;
 
-         if (
-            fullTeam?.group
-         ) {
+         const group =
 
-            const group =
+            await Group.findById(
 
-               await Group.findById(
+               team.group
 
-                  fullTeam.group
+            )
 
+               .select(
+                  "teams"
                )
 
-                  .select(
-                     "teams"
-                  )
+               .lean();
 
-                  .lean();
+         const index =
 
-            const index =
+            group?.teams
+               ?.findIndex(
 
-               group?.teams
-                  ?.findIndex(
+                  id =>
 
-                     id =>
+                     String(id)
 
-                        String(id)
+                     ===
 
-                        ===
+                     String(
+                        team._id
+                     )
 
-                        String(
-                           fullTeam._id
-                        )
+               );
 
-                  );
+         slot =
 
-            slot =
+            index >= 0
 
-               index >= 0
+               ?
 
-                  ?
+               index + 4
 
-                  index + 4
+               :
 
-                  :
-
-                  null;
-
-         }
-
-         match =
-            match.toObject();
+               null;
 
          match.slot =
             slot;
 
       }
 
-      /* CACHE */
+      // CACHE
+
       res.set(
          "Cache-Control",
          "private, max-age=5"
