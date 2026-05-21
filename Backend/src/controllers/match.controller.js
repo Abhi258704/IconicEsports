@@ -230,6 +230,12 @@ status
 
          }
 
+         /* CACHE */
+         res.set(
+            "Cache-Control",
+            "public, max-age=10, stale-while-revalidate=20"
+         );
+
          return res
 
             .status(
