@@ -413,7 +413,7 @@ const moveTeamsToNextRoundService =
       selectedTeamIds,
    }) => {
 
-      await withTransaction(
+      return await withTransaction(
          async (session) => {
 
             const currentGroup =
@@ -428,6 +428,17 @@ const moveTeamsToNextRoundService =
                throw new ApiError(
                   404,
                   "Current group not found"
+               );
+
+            }
+
+            if (
+               currentGroup.qualificationLocked
+            ) {
+
+               throw new ApiError(
+                  400,
+                  "Qualification already locked"
                );
 
             }
@@ -447,7 +458,7 @@ const moveTeamsToNextRoundService =
             }
 
             const qualificationLimit =
-               currentGroup?.round
+               currentGroup.round
                   ?.qualificationCount || 0;
 
             if (
@@ -469,20 +480,49 @@ const moveTeamsToNextRoundService =
                }).session(session);
 
             for (
-               const teamId of selectedTeamIds
+               const teamId
+               of selectedTeamIds
             ) {
+
+               const existingTeam =
+                  await Team.findById(
+                     teamId
+                  ).session(session);
+
+               if (!existingTeam) {
+
+                  throw new ApiError(
+                     404,
+                     "Team not found"
+                  );
+
+               }
+
+               if (
+                  existingTeam.currentRound?.toString() ===
+                  nextRoundId.toString()
+               ) {
+
+                  continue;
+
+               }
 
                let availableGroup =
                   nextGroups.find(
-                     group =>
+                     g =>
                         (
-                           group.teams?.length || 0
-                        ) < 16
+                           g.teams?.length || 0
+                        ) <
+                        (
+                           g.maxTeams || 16
+                        )
                   );
 
-               if (!availableGroup) {
+               if (
+                  !availableGroup
+               ) {
 
-                  const createdGroups =
+                  const created =
                      await Group.create(
                         [
                            {
@@ -499,31 +539,29 @@ const moveTeamsToNextRoundService =
                                  )}`,
 
                               teams: [],
-                           },
+                           }
                         ],
-                        { session }
+                        {
+                           session
+                        }
                      );
 
-                  const newGroup =
-                     createdGroups[0];
+                  availableGroup =
+                     created[0];
 
                   nextGroups.push(
-                     newGroup
+                     availableGroup
                   );
 
-                  nextRound.groups =
-                     nextRound.groups || [];
-
                   nextRound.groups.push(
-                     newGroup._id
+                     availableGroup._id
                   );
 
                   await nextRound.save({
-                     session
+                     session,
+                     validateModifiedOnly:
+                        true,
                   });
-
-                  availableGroup =
-                     newGroup;
 
                }
 
@@ -532,57 +570,102 @@ const moveTeamsToNextRoundService =
                );
 
                await availableGroup.save({
-                  session
+                  session,
+                  validateModifiedOnly:
+                     true,
                });
 
                await Team.findByIdAndUpdate(
+
                   teamId,
+
                   {
-                     group:
-                        availableGroup._id,
 
-                     currentRound:
-                        nextRoundId,
+                     $set: {
 
-                     isEliminated: false,
+                        group:
+                           availableGroup._id,
 
-                     eliminatedInRound: null,
+                        currentRound:
+                           nextRoundId,
+
+                        isEliminated:
+                           false,
+
+                        eliminatedInRound:
+                           null,
+
+                     },
+
+                     $addToSet: {
+
+                        qualifiedRounds:
+                           currentGroup.round._id,
+
+                     },
+
                   },
+
                   {
-                     session
+
+                     session,
+
+                     runValidators:
+                        true,
+
                   }
+
                );
 
             }
 
             const eliminatedTeams =
                currentGroup.teams.filter(
-                  teamId =>
+                  id =>
                      !selectedTeamIds.some(
-                        selectedId =>
-                           selectedId.toString() ===
-                           teamId.toString()
+                        selected =>
+                           selected.toString() ===
+                           id.toString()
                      )
                );
 
-            await Team.updateMany(
-               {
-                  _id: {
-                     $in: eliminatedTeams
+            if (
+               eliminatedTeams.length
+            ) {
+
+               await Team.updateMany(
+
+                  {
+                     _id: {
+                        $in:
+                           eliminatedTeams
+                     }
+                  },
+
+                  {
+
+                     $set: {
+
+                        isEliminated:
+                           true,
+
+                        eliminatedInRound:
+                           currentGroup.round._id,
+
+                        group:
+                           null,
+
+                     }
+
+                  },
+
+                  {
+                     session
                   }
-               },
-               {
-                  isEliminated: true,
 
-                  eliminatedInRound:
-                     currentGroup.round._id,
+               );
 
-                  group: null,
-               },
-               {
-                  session
-               }
-            );
+            }
 
             currentGroup.qualificationLocked =
                true;
@@ -594,8 +677,23 @@ const moveTeamsToNextRoundService =
                nextRoundId;
 
             await currentGroup.save({
-               session
+               session,
+               validateModifiedOnly:
+                  true,
             });
+
+            return {
+
+               success:
+                  true,
+
+               moved:
+                  selectedTeamIds.length,
+
+               nextRound:
+                  nextRound._id,
+
+            };
 
          }
       );
