@@ -397,15 +397,18 @@ const getPublicGroupMatches =
 
             })
 
-               .select(
-
-                  `
+               .select(`
 matchNumber
 map
+scheduledAt
+startTime
 status
 results
-`
+`)
 
+               .populate(
+                  "results.team",
+                  "teamName"
                )
 
                .sort({
@@ -413,7 +416,14 @@ results
                   matchNumber:
                      1,
 
-               });
+               })
+
+               .lean();
+
+         res.set(
+            "Cache-Control",
+            "public, max-age=10, stale-while-revalidate=20"
+         );
 
          return res
 
@@ -429,7 +439,7 @@ results
 
                   matches,
 
-                  "Results fetched"
+                  "Matches fetched"
 
                )
 
