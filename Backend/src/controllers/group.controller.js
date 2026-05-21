@@ -175,7 +175,7 @@ const getGroupLeaderboard = asyncHandler(
 
                   matchesPlayed: 1,
 
-                  "team.teamName": 1,
+                  team: 1,
 
                },
             },
