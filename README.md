@@ -1,5 +1,9 @@
 # 🎮 Esports Tournament Management Platform
 
+
+🔗 Live: https://iconic-esports.vercel.app  
+
+
 A full-stack esports tournament management platform built for managing BGMI scrims, tournaments, rounds, groups, matches, leaderboards, qualification workflows, and LAN-scale tournament operations.
 
 Designed with a modern admin-first workflow focused on real esports tournament management.
@@ -250,7 +254,7 @@ server/
 
 ---
 
-# 🚀 Deployment (wiil be on)
+# 🚀 Deployment
 
 ## Frontend
 - Vercel
