@@ -146,6 +146,14 @@ const getGroupLeaderboard = asyncHandler(
 
                   foreignField: "_id",
 
+                  pipeline: [
+                     {
+                        $project: {
+                           teamName: 1,
+                        },
+                     },
+                  ],
+
                   as: "team",
                },
             },
