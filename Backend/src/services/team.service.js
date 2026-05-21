@@ -9,12 +9,12 @@ import Round from "../models/round.model.js";
 import Group from "../models/group.model.js";
 
 import { ApiError }
-from "../utils/ApiError.js";
+   from "../utils/ApiError.js";
 
 import {
    withTransaction,
 }
-from "../utils/withTransaction.js";
+   from "../utils/withTransaction.js";
 
 
 const verifyTeamService =
@@ -333,22 +333,54 @@ const manualAssignTeamService =
 
             }
 
-            const completedMatches =
+            const groupLocked =
                await Match.exists({
 
                   group: groupId,
 
-                  status: "completed",
+                  $or: [
+
+                     {
+                        status: {
+                           $in: [
+                              "ongoing",
+                              "completed",
+                           ]
+                        }
+                     },
+
+                     {
+                        roomId: {
+                           $exists: true,
+                           $nin: [
+                              null,
+                              ""
+                           ]
+                        }
+                     },
+
+                     {
+                        roomPassword: {
+                           $exists: true,
+                           $nin: [
+                              null,
+                              ""
+                           ]
+                        }
+                     },
+
+                  ],
 
                }).session(session);
 
-            if (
-               completedMatches
-            ) {
+            if (groupLocked) {
 
                throw new ApiError(
+
                   400,
-                  "Cannot add team to completed group"
+
+                  "Cannot verify team into this group. Match already started."
+
                );
 
             }
