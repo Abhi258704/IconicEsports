@@ -595,6 +595,12 @@ const getCurrentMatch =
 
       }
 
+      /* CACHE */
+      res.set(
+         "Cache-Control",
+         "private, max-age=5"
+      );
+
       return res.status(200).json(
 
          new ApiResponse(
