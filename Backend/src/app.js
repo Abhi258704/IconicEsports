@@ -23,7 +23,8 @@ import { errorHandler }
 
 const app = express();
 
-
+/* REQUIRED FOR RENDER */
+app.set("trust proxy", 1);
 
 /* SECURITY */
 
