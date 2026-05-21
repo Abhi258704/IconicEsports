@@ -161,6 +161,24 @@ const getGroupLeaderboard = asyncHandler(
             {
                $unwind: "$team",
             },
+
+            {
+               $project: {
+
+                  _id: 1,
+
+                  totalPoints: 1,
+
+                  totalPlacementPoints: 1,
+
+                  totalKills: 1,
+
+                  matchesPlayed: 1,
+
+                  "team.teamName": 1,
+
+               },
+            },
          ]);
 
 
