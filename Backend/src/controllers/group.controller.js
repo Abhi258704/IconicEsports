@@ -155,6 +155,13 @@ const getGroupLeaderboard = asyncHandler(
             },
          ]);
 
+
+      /* CACHE */
+      res.set(
+         "Cache-Control",
+         "public, max-age=10, stale-while-revalidate=20"
+      );
+
       return res.status(200).json(
          new ApiResponse(
             200,
