@@ -294,7 +294,7 @@ export default function TournamentPage() {
 
 
 
-                    <div className="flex justify-between">
+                    {/* <div className="flex justify-between">
 
                         <span className="text-gray-500">
 
@@ -310,7 +310,7 @@ export default function TournamentPage() {
 
                         </span>
 
-                    </div>
+                    </div> */}
 
 
 
