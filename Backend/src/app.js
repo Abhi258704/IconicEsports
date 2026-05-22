@@ -159,6 +159,13 @@ app.get("/test", (req, res) => {
    res.send("Server working");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    time: new Date()
+  });
+});
+
 
 
 
