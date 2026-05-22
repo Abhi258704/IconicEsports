@@ -293,7 +293,7 @@ ${team.isEliminated
 
                     <p className="text-[10px] tracking-[0.25em] text-red-400">
 
-                        PLAY NOW
+                        IDP
 
                     </p>
 
@@ -333,7 +333,7 @@ ${team.isEliminated
 
                     <p className="text-[10px] tracking-[0.25em] text-cyan-400">
 
-                        BACKUP
+                        BACKUP IDP
 
                     </p>
 
